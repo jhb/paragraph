@@ -2,7 +2,7 @@ DB backends
 ===========
 * Neo4j
 * ZODB
-* SQLite
+* SQLite / litesql
 
 DB Abstraction
 ==============
@@ -36,9 +36,16 @@ Structure and permissions
 * Content is related to nodes within those trees
 * Security inherited down the tree
 
-
-UI Interactions
+GUI and add-ons
 ===============
+* Editor
+* Display of collections
+* maps, timelines, etc.
+* Parallax like display <https://vimeo.com/1513562>
+* Mapping of structured data into the graph (wikipedia, musicbrainz,...)
+
+Editor
+======
 * Inspecting nodes
 * Arranging nodes
   * Multiple perspective nodes
@@ -50,6 +57,5 @@ UI Interactions
 * Multi-selecting nodes
   * arranging nodes
 
-* Mapping of structured data into the graph (wikipedia, musicbrainz,...)
-* Display of collections
+
 
