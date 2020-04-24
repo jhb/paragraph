@@ -33,7 +33,11 @@ class Traversal:
 class Node(UserDict,Traversal):
     """Node dict(_id=1,_labels=[],prop1='val1')
     """
-    labels = []
+    def __init__(self, *labels, **props):
+        super().__init__(**props)
+        self.labels = set(labels)
+
+    labels = set()
 
 class Edge(UserDict,Traversal):
     """Edge ["""
@@ -43,10 +47,7 @@ class Edge(UserDict,Traversal):
 
 class GraphDB:
 
-    def label2id(self):
-        pass
-
-    def id2label(self):
+    def __init__(self, **kwargs):
         pass
 
     def add_node(self, *labels, **properties):
