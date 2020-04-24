@@ -1,2 +1,2 @@
 # paragraph
-A graph based cms engine
+cms for labeled property graphs 
