@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>main</title>
+</head>
+<body>This is the body. Hello, btw. ${foo}
+<i tal:omit-tag="foo">
+    <b>foobar</b>
+    <div metal:define-macro="ajax">
+        the main ajax content
+
+    </div>
+
+</i>
+
+
+</body>
+</html>
