@@ -1,18 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>main</title>
-</head>
-<body>This is the body. Hello, btw. ${foo}
-<i tal:omit-tag="foo">
-    <b>foobar</b>
-    <div metal:define-macro="ajax">
-        the main ajax content
-
-    </div>
-
-</i>
-
-
-</body>
-</html>
+<c metal:define-macro="main" tal:omit-tag=""><!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <title metal:define-slot="title">main</title>
+        <style>
+            html, body {
+                height: 98vh
+            }
+        </style>
+        <script src="/static/jquery-3.5.0.min.js"></script>
+        <script src="/static/paragraph.js"></script>
+        <link rel="shortcut icon" href="${ flask.url_for('static', filename='favicon.ico') }">
+    </head>
+    <body>
+    <span metal:define-macro="ajaxcontent" tal:omit-tag=""><div metal:define-slot="content" tal:omit-tag=""></div></span>
+    </body>
+    </html>
+</c>
