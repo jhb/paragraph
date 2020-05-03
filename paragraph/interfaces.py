@@ -1,4 +1,4 @@
-from collections import UserDict
+
 
 
 class Traversal:
@@ -30,20 +30,52 @@ class Traversal:
     def alias(self, name):
         pass
 
-class Node(UserDict,Traversal):
-    """Node dict(_id=1,_labels=[],prop1='val1')
-    """
+class ObjectDict(dict):
+
+    __getattr__ = dict.__getitem__
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
+    def _similar_to(self, other, ellipsis='...'):
+        """Compare nodes to another dictonary, leaving out the ellipsis"""
+
+        errors = {}
+
+        if len(self) != len(other):
+            errors['_different len'] = (len(self),len(other))
+
+        for k,v in self.items():
+            if ellipsis and  v==ellipsis or other[k]==ellipsis:
+                continue
+            if v != other[k]:
+                errors[k] = (v,other[k])
+
+        if errors:
+            return errors
+        else:
+            return True
+
+    def __eq__(self, other):
+        return self._similar_to(other) == True
+
+    def __ne__(self, other):
+        return self._similar_to(other) != True
+
+class Node(ObjectDict, Traversal):
+
     def __init__(self, *labels, **props):
         super().__init__(**props)
-        self.labels = set(labels)
+        self.setdefault('_id', None)
+        self.setdefault('_labels',set())
+        self._labels.update(labels)
 
-    labels = set()
-
-class Edge(UserDict,Traversal):
-    """Edge ["""
-    source = None
-    reltype = None
-    target = None
+class Edge(ObjectDict,Traversal):
+    def __init__(self, _source=None,_reltype=None,_target=None, **props):
+        super().__init__(**props)
+        self.setdefault('_id', None)
+        self.setdefault('_source',_source)
+        self.setdefault('_reltype', _source)
+        self.setdefault('_target', _source)
 
 class GraphDB:
 

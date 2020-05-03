@@ -5,21 +5,24 @@ Database connector for Neo4j
 
 Create a node
 >>> n = db.add_node('Testlabel', foo='bar')
->>> pprint(n) # doctest: +ELLIPSIS
-{'foo': 'bar', '_id': '...'}
->>> n.labels
-{'Testlabel'}
+>>> n == {'_id': '...', '_labels': {'Testlabel'}, 'foo': 'bar'}
+True
 
 Upate the node
 >>> n['foo2']='bar2'
->>> n.labels.add('Testlabel2')
->>> pprint(db.update_node(n))  # doctest: +ELLIPSIS
-{'foo2': 'bar2', 'foo': 'bar', '_id': '...'}
+>>> n._labels.add('Testlabel2')
+>>> n2 = db.update_node(n)
+>>> n2 == {'_id': '...',
+...        '_labels': {'Testlabel2', 'Testlabel'},
+...        'foo2': 'bar2',
+...        'foo': 'bar'}
+True
 """
 
-from pprint import pprint
-from neo4j import GraphDatabase
 from uuid import uuid4
+
+from neo4j import GraphDatabase
+
 from paragraph.interfaces import GraphDB, Node, Edge
 
 
@@ -54,7 +57,7 @@ class NeoGraphDB(GraphDB):
     def _neo2node(self,neonode):
         node = Node()
         node.update(neonode)
-        node.labels = set(neonode.labels)
+        node._labels.update(neonode.labels)
         return node
 
     def _new_uid(self):
@@ -74,13 +77,14 @@ class NeoGraphDB(GraphDB):
         return self._neo2node(result.single()['n'])
 
     def update_node(self, node: Node):
-        labelstring = self._labels2string(node.labels)
+        labelstring = self._labels2string(node._labels)
         if labelstring:
             labelstring = 'set n'+labelstring
+        props = {k: v for k, v in node.items() if k not in ['_labels']}
         result = self._run(f'match (n) where n._id=$_id {labelstring} set n=$props return n',
                            labelstring=labelstring,
                            _id=node['_id'],
-                           props=dict(node.items()))
+                           props=props)
         return self._neo2node(result.single()['n'])
 
 
