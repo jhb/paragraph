@@ -1,4 +1,12 @@
+import json
 
+
+class ObjectDictEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, set):
+            return sorted(list(obj))
+        else:
+            return json.JSONEncoder.default(self, obj)
 
 
 class Traversal:
@@ -61,12 +69,22 @@ class ObjectDict(dict):
     def __ne__(self, other):
         return self._similar_to(other) != True
 
+    def to_json(self):
+        return json.dumps(self, cls=ObjectDictEncoder, indent=2)
+
+    def from_json(self, jsondata):
+        data = json.loads(jsondata)
+        if '_labels' in data:
+            data['_labels'] = set(data['_labels'])
+        self.update(data)
+
+
 class Node(ObjectDict, Traversal):
 
     def __init__(self, *labels, **props):
         super().__init__(**props)
         self.setdefault('_id', None)
-        self.setdefault('_labels',set())
+        self.setdefault('_labels', set())
         self._labels.update(labels)
 
 class Edge(ObjectDict,Traversal):

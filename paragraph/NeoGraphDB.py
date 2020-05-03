@@ -17,7 +17,27 @@ Upate the node
 ...        'foo2': 'bar2',
 ...        'foo': 'bar'}
 True
+
+>>> js = n.to_json()
+>>> print(js) # #doctest: +ELLIPSIS
+{
+  "_id": "...",
+  "_labels": [
+    "Testlabel",
+    "Testlabel2"
+  ],
+  "foo": "bar",
+  "foo2": "bar2"
+}
+
+>>> from paragraph.interfaces import Node
+>>> n3 = Node()
+>>> n3.from_json(js)
+>>> n3._similar_to(n,ellipsis='_no_elispis')
+True
 """
+
+
 
 from uuid import uuid4
 
@@ -37,7 +57,7 @@ class NeoGraphDB(GraphDB):
         :param password:
         :param encrypted:
         """
-        self.driver = GraphDatabase.driver(uri,auth=(username,password),encrypted=encrypted)
+        self.driver = GraphDatabase.driver(uri, auth=(username, password), encrypted=encrypted)
         self.session = self.driver.session()
         self.tx = None
 
@@ -50,11 +70,11 @@ class NeoGraphDB(GraphDB):
             self.tx = self.session.begin_transaction()
         return self.tx
 
-    def _run(self,statement,**kwargs):
+    def _run(self, statement, **kwargs):
         tx = self.begin()
-        return tx.run(statement,**kwargs)
+        return tx.run(statement, **kwargs)
 
-    def _neo2node(self,neonode):
+    def _neo2node(self, neonode):
         node = Node()
         node.update(neonode)
         node._labels.update(neonode.labels)
@@ -63,7 +83,7 @@ class NeoGraphDB(GraphDB):
     def _new_uid(self):
         return uuid4().hex
 
-    def _labels2string(self,labels):
+    def _labels2string(self, labels):
         labelstring = ':'.join([str(l) for l in labels])
         if labelstring:
             labelstring = ':' + labelstring
@@ -71,7 +91,7 @@ class NeoGraphDB(GraphDB):
 
     def add_node(self, *labels, **properties):
         if '_id' not in properties:
-            properties['_id']=self._new_uid()
+            properties['_id'] = self._new_uid()
         labelstring = self._labels2string(labels)
         result = self._run(f'create (n{labelstring}) set n = $props return n', props=properties)
         return self._neo2node(result.single()['n'])
@@ -79,14 +99,13 @@ class NeoGraphDB(GraphDB):
     def update_node(self, node: Node):
         labelstring = self._labels2string(node._labels)
         if labelstring:
-            labelstring = 'set n'+labelstring
+            labelstring = 'set n' + labelstring
         props = {k: v for k, v in node.items() if k not in ['_labels']}
         result = self._run(f'match (n) where n._id=$_id {labelstring} set n=$props return n',
                            labelstring=labelstring,
                            _id=node['_id'],
                            props=props)
         return self._neo2node(result.single()['n'])
-
 
     def del_node(self, _id):
         pass
@@ -128,9 +147,8 @@ class NeoGraphDB(GraphDB):
         pass
 
 
-
 if __name__ == "__main__":
     db = NeoGraphDB()
-    n = db.add_node('Test',foo='bar')
+    n = db.add_node('Test', foo='bar')
     print(n)
     print(n.labels)
