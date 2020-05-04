@@ -1,44 +1,5 @@
-"""
-Database connector for Neo4j
-
->>> db = NeoGraphDB()
-
-Create a node
->>> n = db.add_node('Testlabel', foo='bar')
->>> n == {'_id': '...', '_labels': {'Testlabel'}, 'foo': 'bar'}
-True
-
-Upate the node
->>> n['foo2']='bar2'
->>> n._labels.add('Testlabel2')
->>> n2 = db.update_node(n)
->>> n2 == {'_id': '...',
-...        '_labels': {'Testlabel2', 'Testlabel'},
-...        'foo2': 'bar2',
-...        'foo': 'bar'}
-True
-
->>> js = n.to_json()
->>> print(js) # #doctest: +ELLIPSIS
-{
-  "_id": "...",
-  "_labels": [
-    "Testlabel",
-    "Testlabel2"
-  ],
-  "foo": "bar",
-  "foo2": "bar2"
-}
-
->>> from paragraph.interfaces import Node
->>> n3 = Node()
->>> n3.from_json(js)
->>> n3._similar_to(n,ellipsis='_no_elispis')
-True
-"""
-
-
-
+"""Database driver for neo4j"""
+import logging
 from uuid import uuid4
 
 from neo4j import GraphDatabase
@@ -48,7 +9,7 @@ from paragraph.interfaces import GraphDB, Node, Edge
 
 class NeoGraphDB(GraphDB):
 
-    def __init__(self, uri='bolt://localhost:7687', username='', password='', encrypted=False):
+    def __init__(self, uri='bolt://localhost:7687', username='', password='', encrypted=False, debug=0):
         """
         Initialize the database connection
 
@@ -60,6 +21,7 @@ class NeoGraphDB(GraphDB):
         self.driver = GraphDatabase.driver(uri, auth=(username, password), encrypted=encrypted)
         self.session = self.driver.session()
         self.tx = None
+        self.debug = debug
 
     def begin(self):
         """Begin a transaction
@@ -72,6 +34,8 @@ class NeoGraphDB(GraphDB):
 
     def _run(self, statement, **kwargs):
         tx = self.begin()
+        if self.debug:  #
+            logging.debug(f'{statement} {kwargs}')  # @@_todo
         return tx.run(statement, **kwargs)
 
     def _neo2node(self, neonode):
@@ -107,8 +71,11 @@ class NeoGraphDB(GraphDB):
                            props=props)
         return self._neo2node(result.single()['n'])
 
-    def del_node(self, _id):
-        pass
+    def del_node(self, _id, detach=False):
+        if detach:
+            result = self._run("match (n) where n._id=$_id detach delete n", _id=_id)
+        else:
+            result = self._run("match (n) where n._id=$_id delete n", _id=_id)
 
     def add_edge(self, source, reltype, target, **properties):
         pass
@@ -125,8 +92,12 @@ class NeoGraphDB(GraphDB):
     def del_node_index(self, name):
         pass
 
-    def query_node(self, **filters):
-        pass
+    def query_nodes(self, **filters):
+        result = self._run('''WITH $filters as filters 
+                              MATCH (n) WHERE ALL(k in keys(filters) WHERE filters[k] = n[k])
+                              return n''',
+                           filters=filters)
+        return [self._neo2node(r['n']) for r in result]
 
     def add_edge_index(self, name, index):
         pass

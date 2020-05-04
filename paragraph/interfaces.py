@@ -86,12 +86,14 @@ class Node(ObjectDict, Traversal):
         self.setdefault('_id', None)
         self.setdefault('_labels', set())
         self._labels.update(labels)
+        # self.__dict__['labels']=self['_labels'] # @@_label_usage
 
-class Edge(ObjectDict,Traversal):
-    def __init__(self, _source=None,_reltype=None,_target=None, **props):
+
+class Edge(ObjectDict, Traversal):
+    def __init__(self, _source=None, _reltype=None, _target=None, **props):
         super().__init__(**props)
         self.setdefault('_id', None)
-        self.setdefault('_source',_source)
+        self.setdefault('_source', _source)
         self.setdefault('_reltype', _source)
         self.setdefault('_target', _source)
 
