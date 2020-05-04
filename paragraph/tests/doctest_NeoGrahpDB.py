@@ -51,4 +51,14 @@ Now its not...
     >>> db.del_node(n4._id)
     >>> db.query_nodes(_id=n4._id)
     []
+
+Three nodes to create edges
+    >>> alice = db.add_node('Person',name='alice')
+    >>> bob =  db.add_node('Person',name='bob')
+    >>> charlie = db.add_node('Person',name='charlie')
+
+add a simple edge
+    >>> edge1 = db.add_edge(alice, 'likes', bob, foo='bar')
+    >>> edge1 == dict(_source=alice, _target=bob,_reltype='likes',foo='bar',_id='...')
+    True
 """

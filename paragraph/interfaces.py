@@ -49,17 +49,21 @@ class ObjectDict(dict):
 
         errors = {}
 
-        if len(self) != len(other):
-            errors['_different len'] = (len(self),len(other))
+        if not isinstance(other, dict):
+            errors['_not suitable type'] = (type(self), type(other))
+            return False
 
-        for k,v in self.items():
-            if ellipsis and  v==ellipsis or other[k]==ellipsis:
+        if len(self) != len(other):
+            errors['_different len'] = (len(self), len(other))
+
+        for k, v in self.items():
+            if ellipsis and v == ellipsis or other[k] == ellipsis:
                 continue
             if v != other[k]:
-                errors[k] = (v,other[k])
+                errors[k] = (v, other[k])
 
         if errors:
-            return errors
+            return False  # @@_todo
         else:
             return True
 
@@ -69,8 +73,8 @@ class ObjectDict(dict):
     def __ne__(self, other):
         return self._similar_to(other) != True
 
-    def to_json(self):
-        return json.dumps(self, cls=ObjectDictEncoder, indent=2)
+    def to_json(self, indent=2):
+        return json.dumps(self, cls=ObjectDictEncoder, indent=indent)
 
     def from_json(self, jsondata):
         data = json.loads(jsondata)
@@ -94,8 +98,15 @@ class Edge(ObjectDict, Traversal):
         super().__init__(**props)
         self.setdefault('_id', None)
         self.setdefault('_source', _source)
-        self.setdefault('_reltype', _source)
-        self.setdefault('_target', _source)
+        self.setdefault('_reltype', _reltype)
+        self.setdefault('_target', _target)
+
+    def __repr__(self):
+        data = dict(self.items())
+        data['_source'] = self._source._id
+        data['_target'] = self._target._id
+        return str(data)
+
 
 class GraphDB:
 
@@ -125,8 +136,8 @@ class GraphDB:
     
     def del_node_index(self, name):
         pass
-    
-    def query_node(self, **filters):
+
+    def query_nodes(self, **filters):
         pass
 
     def add_edge_index(self, name, index):
