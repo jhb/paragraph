@@ -1,5 +1,4 @@
 """Database driver for neo4j"""
-import logging
 from uuid import uuid4
 
 from neo4j import GraphDatabase
@@ -35,7 +34,7 @@ class NeoGraphDB(GraphDB):
     def _run(self, statement, **kwargs):
         tx = self.begin()
         if self.debug:  #
-            logging.debug(f'{statement} {kwargs}')  # @@_todo
+            print(f'{statement} {kwargs}')  # @@_todo
         return tx.run(statement, **kwargs)
 
     def _neo2node(self, neonode):
@@ -130,10 +129,12 @@ class NeoGraphDB(GraphDB):
         pass
 
     def commit(self):
-        pass
+        self.tx.commit()
+        self.tx = None
 
     def rollback(self):
-        pass
+        self.tx.rollback()
+        self.tx = None
 
     def query(self, query):
         pass
