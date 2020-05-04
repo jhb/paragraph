@@ -1,2 +1,2 @@
 # paragraph
-cms for labeled property graphs 
+graph management system for labeled property graphs 
