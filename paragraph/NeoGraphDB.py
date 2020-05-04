@@ -6,6 +6,9 @@ from neo4j import GraphDatabase
 from paragraph.interfaces import GraphDB, Node, Edge
 
 
+# @@_todo: uses labels and types for filters
+
+
 class NeoGraphDB(GraphDB):
 
     def __init__(self, uri='bolt://localhost:7687', username='', password='', encrypted=False, debug=0):
@@ -84,7 +87,7 @@ class NeoGraphDB(GraphDB):
         else:
             result = self._run("match (n) where n._id=$_id delete n", _id=_id)
 
-    def query_nodes(self, **filters):
+    def query_nodes(self, *labels, **filters):
         result = self._run('''WITH $filters as filters 
                               MATCH (n) WHERE ALL(k in keys(filters) WHERE filters[k] = n[k])
                               return n''',
@@ -110,11 +113,17 @@ class NeoGraphDB(GraphDB):
         r = self._run('match (s)-[r]->(t) where r._id=$r_id set r = $props return s,r,t', r_id=edge._id, props=props)
         return self._neo2edge(r.single()['r'])
 
-    def del_edge(self, edgeid):
-        pass
+    def query_edge(self, *reltypes, **filters):
+        result = self._run('''with $filters as filters
+                              match (s)-[r]->(t)
+                              WHERE ALL(k in keys(filters) WHERE filters[k] = r[k])
+                              return s,r,t
+                              ''',
+                           filters=filters)
+        return [self._neo2edge(r['r']) for r in result]
 
-    def query_edge(self, **filters):
-        pass
+    def del_edge(self, edgeid):
+        result = self._run('''match (s)-[r]->(t) where r._id=$_id delete r''', _id=edgeid)
 
     def add_node_index(self, name, index):
         pass

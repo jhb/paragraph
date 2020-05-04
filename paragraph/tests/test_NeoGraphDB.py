@@ -102,3 +102,16 @@ def test_update_edge(db, testdata):
                          _reltype='test',
                          _target=testdata.bob,
                          foo='bar2')
+
+
+def test_query_edge(db, testdata):
+    testedge = db.add_edge(testdata.alice, 'testrel', testdata.bob, bar='foo')
+    newedge = db.query_edge(bar='foo')[0]
+    assert newedge == testedge
+
+
+def test_delete_edge(db, testdata):
+    testedge = db.add_edge(testdata.alice, 'testrel', testdata.bob, bar='foo')
+    assert len(db.query_edge(bar='foo')) > 0
+    db.del_edge(testedge._id)
+    assert len(db.query_edge(bar='foo')) == 0
