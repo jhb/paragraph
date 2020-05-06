@@ -13,10 +13,12 @@ class SimpleTraverser(Traverser):
         self.prev = prev
         self.resultnodes = OrderedDict()
         self.resultedges = OrderedDict()
+        if prev:
+            self.resultnodes.update(prev.resultnodes)
+            self.resultedges.update(prev.resultnodes)
 
     def oN(self, *reltypes, minhops=1, maxhops=1, ids=False, **filters):
-        self.resultnodes = OrderedDict()
-        self.resultedges = OrderedDict()
+        localnodes = OrderedDict()
         thisround = OrderedDict({n._id: n for n in self.nodes})
         nextround = OrderedDict()
         for hop in range(1, maxhops + 1):
@@ -25,15 +27,15 @@ class SimpleTraverser(Traverser):
                 for edge in edges:
                     self.resultedges[edge._id] = edge
                     target = edge._target
-                    if hop >= minhops and target._id not in self.resultnodes:
-                        self.resultnodes[target._id] = target
+                    if hop >= minhops and target._id not in localnodes:
+                        localnodes[target._id] = target
                     if target._id not in nextround:
                         nextround[target._id] = target
 
             thisround = nextround
             nextround = OrderedDict()
-
-        return SimpleTraverser(self.g, list(self.resultnodes.values()), prev=self)
+        self.resultnodes.update(localnodes)
+        return SimpleTraverser(self.g, list(localnodes.values()), prev=self)
         # return (list(resultnodes.values()), list(resultedges.values()))
 
     @property

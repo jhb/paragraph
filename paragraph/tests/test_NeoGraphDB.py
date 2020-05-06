@@ -94,34 +94,34 @@ def test_delete_edge(db, testdata):
 
 def test_simpletraverser_oN(linkeddata):
     ld = linkeddata
-    t = ld.db.traverse(ld.alice)
+    db = ld.db
 
-    t2 = t.oN()
-    assert ld.bob in t2.nodes
-    assert ld.charlie in t2.nodes
+    r = db.traverse(name='alice').oN()
+    assert ld.bob in r.nodes
+    assert ld.charlie in r.nodes
 
-    t2 = t.oN('long')
-    assert ld.charlie not in t2.nodes
+    r = db.traverse(name='alice').oN('long')
+    assert ld.charlie not in r.nodes
 
-    t2 = t.oN('long', maxhops=2)
-    assert ld.bob in t2.nodes
-    assert ld.charlie in t2.nodes
+    r = db.traverse(name='alice').oN('long', maxhops=2)
+    assert ld.bob in r.nodes
+    assert ld.charlie in r.nodes
 
+    r = db.traverse(name='alice').oN('long', maxhops=1)
+    assert ld.bob in r.nodes
+    assert ld.charlie not in r.nodes
 
-    t2 = t.oN('long', maxhops=1)
-    assert ld.bob in t2.nodes
-    assert ld.charlie not in t2.nodes
-
-    t2 = t.oN('short')
-    assert ld.bob not in t2.nodes
-    assert ld.charlie in t2.nodes
+    r = db.traverse(name='alice').oN('short')
+    assert ld.bob not in r.nodes
+    assert ld.charlie in r.nodes
 
 
 def test_simpletraverser_linked(linkeddata):
     ld = linkeddata
-    t = ld.db.traverse(name='alice')
-    t2 = t.oN('long').oN('long')
-    assert t2.nodes == [ld.charlie]
+    db = ld.db
+
+    r = db.traverse(name='alice').oN('long').oN('long')
+    assert r.nodes == [ld.charlie]
 
 
 def test_simpletraverser_minmax(linkeddata):
