@@ -96,26 +96,31 @@ def test_delete_edge(db, testdata):
 from paragraph.simpletraverser import SimpleTraverser
 
 
-def test_simpletraverser_oN(testdata, db):
-    db.add_edge(testdata.alice, 'long', testdata.bob)
-    db.add_edge(testdata.bob, 'long', testdata.charlie)
-    db.add_edge(testdata.alice, 'short', testdata.charlie)
-    t = SimpleTraverser(db)
+def test_simpletraverser_oN(linkeddata, db):
+    ld = linkeddata
+    t = SimpleTraverser(db, ld.alice)
 
-    (nodes, edges) = t.oN(testdata.alice)
-    assert testdata.bob in nodes
-    assert testdata.charlie in nodes
+    t2 = t.oN()
+    assert ld.bob in t2.nodes
+    assert ld.charlie in t2.nodes
 
-    (nodes, edges) = t.oN(testdata.alice, 'long')
-    assert testdata.charlie not in nodes
+    t2 = t.oN('long')
+    assert ld.charlie not in t2.nodes
 
-    (nodes, edges) = t.oN(testdata.alice, 'long', maxhops=2)
-    assert testdata.charlie in nodes
+    t2 = t.oN('long', maxhops=2)
+    assert ld.charlie in t2.nodes
 
-    (nodes, edges) = t.oN(testdata.alice, 'long', maxhops=1)
-    assert testdata.bob in nodes
-    assert testdata.charlie not in nodes
+    t2 = t.oN('long', maxhops=1)
+    assert ld.bob in t2.nodes
+    assert ld.charlie not in t2.nodes
 
-    (nodes, edges) = t.oN(testdata.alice, 'short')
-    assert testdata.bob not in nodes
-    assert testdata.charlie in nodes
+    t2 = t.oN('short')
+    assert ld.bob not in t2.nodes
+    assert ld.charlie in t2.nodes
+
+
+def test_simpletraverser_linked(linkeddata, db):
+    ld = linkeddata
+    t = SimpleTraverser(db, ld.alice)
+    t2 = t.oN('long').oN('long')
+    assert t2.nodes == [ld.charlie]

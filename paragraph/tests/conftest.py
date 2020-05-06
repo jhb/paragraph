@@ -23,3 +23,10 @@ def testdata(neograph):
     data.bob = neograph.add_node('Person', name='bob')
     data.charlie = neograph.add_node('Person', name='charlie')
     return data
+
+@pytest.fixture()
+def linkeddata(neograph, testdata):
+    neograph.add_edge(testdata.alice, 'long', testdata.bob)
+    neograph.add_edge(testdata.bob, 'long', testdata.charlie)
+    neograph.add_edge(testdata.alice, 'short', testdata.charlie)
+    return testdata

@@ -1,16 +1,15 @@
 from _collections import OrderedDict
+from copy import copy
 
 from paragraph.interfaces import Traverser
 
 
 class SimpleTraverser(Traverser):
 
-    def oN(self, nodes, *reltypes, minhops=0, maxhops=1, ids=False, **filters):
-        if type(nodes) != list:
-            nodes = [nodes]
+    def oN(self, *reltypes, minhops=0, maxhops=1, ids=False, **filters):
         resultnodes = OrderedDict()
         resultedges = OrderedDict()
-        thisround = list(nodes)
+        thisround = copy(self.nodes)
         nextround = []
         for hop in range(minhops, maxhops):
             for node in thisround:
@@ -23,4 +22,5 @@ class SimpleTraverser(Traverser):
                         nextround.append(target)
             thisround = nextround
             nextround = []
-        return (list(resultnodes.values()), list(resultedges.values()))
+        return SimpleTraverser(self.g, list(resultnodes.values()))
+        # return (list(resultnodes.values()), list(resultedges.values()))

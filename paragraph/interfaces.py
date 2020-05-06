@@ -191,5 +191,8 @@ class GraphDB:
 
 class Traverser(Traversal):
 
-    def __init__(self, graphdb: GraphDB):
+    def __init__(self, graphdb: GraphDB, nodes):
         self.g = graphdb
+        if type(nodes) != list:
+            nodes = [nodes]
+        self.nodes = nodes
