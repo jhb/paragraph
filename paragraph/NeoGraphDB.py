@@ -51,8 +51,14 @@ class NeoGraphDB(GraphDB):
         edge = Edge(_source=self._neo2node(relation.start_node),
                     _reltype=relation.type,
                     _target=self._neo2node(relation.end_node))
-        edge.update(relation)
+        edge.update({k: v for k, v in relation.items() if k not in ['_source', '_target']})
         return edge
+
+    def _nodeid(self, nodeid):
+        if type(nodeid) is Node:
+            return nodeid._id
+        else:
+            return nodeid
 
     def _new_uid(self):
         return uuid4().hex
@@ -94,17 +100,18 @@ class NeoGraphDB(GraphDB):
                            filters=filters)
         return [self._neo2node(r['n']) for r in result]
 
-    def add_edge(self, source, reltype, target, **properties):
+    def add_edge(self, _source, _reltype, _target, **properties):
         if '_id' not in properties:
             properties['_id'] = self._new_uid()
-        if type(source) == Node:
-            source = source._id
-        if type(target) == Node:
-            target = target._id
+        props = dict(properties)
+        _source = self._nodeid(_source)
+        _target = self._nodeid(_target)
+        props['_source'] = _source
+        props['_target'] = _target
         r = self._run('''match (s) where s._id=$s_id
                          match (t) where t._id=$t_id
                          create (s)-[r:%s]->(t) set r = $props return s,r,t
-        ''' % reltype, s_id=source, t_id=target, props=properties)
+        ''' % _reltype, s_id=_source, t_id=_target, props=props)
 
         return self._neo2edge(r.single()['r'])
 
@@ -113,13 +120,23 @@ class NeoGraphDB(GraphDB):
         r = self._run('match (s)-[r]->(t) where r._id=$r_id set r = $props return s,r,t', r_id=edge._id, props=props)
         return self._neo2edge(r.single()['r'])
 
-    def query_edge(self, *reltypes, **filters):
+    def query_edges(self, *reltypes, **filters):
+        relstring = ''
+        print('reltypes', reltypes)
+        if reltypes:
+            if type(reltypes) not in [list, tuple]:
+                reltypes = [reltypes]
+            relstring = ':' + '|'.join(reltypes)
+        print('relstring', relstring)
+        for k, v in filters.items():
+            filters[k] = self._nodeid(v)
         result = self._run('''with $filters as filters
-                              match (s)-[r]->(t)
+                              match (s)-[r%s]->(t)
                               WHERE ALL(k in keys(filters) WHERE filters[k] = r[k])
                               return s,r,t
-                              ''',
-                           filters=filters)
+                              ''' % relstring,
+                           filters=filters,
+                           )
         return [self._neo2edge(r['r']) for r in result]
 
     def del_edge(self, edgeid):

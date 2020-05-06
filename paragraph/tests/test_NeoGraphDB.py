@@ -1,30 +1,4 @@
-import pytest
-
-from paragraph.NeoGraphDB import NeoGraphDB
 from paragraph.interfaces import Node
-from paragraph.interfaces import ObjectDict
-
-
-@pytest.fixture(scope='session')
-def neograph():
-    return NeoGraphDB(debug=0)
-
-
-@pytest.fixture()
-def db(neograph):
-    yield neograph
-    neograph.rollback()
-
-
-@pytest.fixture()
-def testdata(neograph):
-    data = ObjectDict()
-    data.node = neograph.add_node('Testlabel', foo='bar')
-    data.alice = neograph.add_node('Person', name='alice')
-    data.bob = neograph.add_node('Person', name='bob')
-    data.charlie = neograph.add_node('Person', name='charlie')
-    return data
-
 
 def test_create_node(db):
     "Create a node"
@@ -106,12 +80,42 @@ def test_update_edge(db, testdata):
 
 def test_query_edge(db, testdata):
     testedge = db.add_edge(testdata.alice, 'testrel', testdata.bob, bar='foo')
-    newedge = db.query_edge(bar='foo')[0]
+    newedge = db.query_edges('testrel', bar='foo')[0]
+    assert newedge == testedge
+    newedge = db.query_edges(bar='foo')[0]
     assert newedge == testedge
 
 
 def test_delete_edge(db, testdata):
     testedge = db.add_edge(testdata.alice, 'testrel', testdata.bob, bar='foo')
-    assert len(db.query_edge(bar='foo')) > 0
+    assert len(db.query_edges(bar='foo')) > 0
     db.del_edge(testedge._id)
-    assert len(db.query_edge(bar='foo')) == 0
+    assert len(db.query_edges(bar='foo')) == 0
+
+
+from paragraph.simpletraverser import SimpleTraverser
+
+
+def test_simpletraverser_oN(testdata, db):
+    db.add_edge(testdata.alice, 'long', testdata.bob)
+    db.add_edge(testdata.bob, 'long', testdata.charlie)
+    db.add_edge(testdata.alice, 'short', testdata.charlie)
+    t = SimpleTraverser(db)
+
+    (nodes, edges) = t.oN(testdata.alice)
+    assert testdata.bob in nodes
+    assert testdata.charlie in nodes
+
+    (nodes, edges) = t.oN(testdata.alice, 'long')
+    assert testdata.charlie not in nodes
+
+    (nodes, edges) = t.oN(testdata.alice, 'long', maxhops=2)
+    assert testdata.charlie in nodes
+
+    (nodes, edges) = t.oN(testdata.alice, 'long', maxhops=1)
+    assert testdata.bob in nodes
+    assert testdata.charlie not in nodes
+
+    (nodes, edges) = t.oN(testdata.alice, 'short')
+    assert testdata.bob not in nodes
+    assert testdata.charlie in nodes

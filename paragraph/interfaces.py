@@ -11,22 +11,22 @@ class ObjectDictEncoder(json.JSONEncoder):
 
 class Traversal:
 
-    def iN(self, *reltypes, minhops=None, maxhops=None, idsonly=False, **filters):
+    def iN(self, *reltypes, minhops=None, maxhops=None, ids=False, **filters):
         pass
 
-    def oN(self, *reltypes, minhops=None, maxhops=None, idsonly=False, **filters):
+    def oN(self, *reltypes, minhops=None, maxhops=None, ids=False, **filters):
         pass
 
-    def iE(self, *reltypes, minhops=None, maxhops=None, idsonly=False, **filters):
+    def iE(self, *reltypes, minhops=None, maxhops=None, ids=False, **filters):
         pass
 
-    def oE(self, *reltypes, minhops=None, maxhops=None, idsonly=False, **filters):
+    def oE(self, *reltypes, minhops=None, maxhops=None, ids=False, **filters):
         pass
 
-    def bN(self, *reltypes, minhops=None, maxhops=None, idsonly=False, **filters):
+    def bN(self, *reltypes, minhops=None, maxhops=None, ids=False, **filters):
         pass
 
-    def bE(self, *reltypes, minhops=None, maxhops=None, idsonly=False, **filters):
+    def bE(self, *reltypes, minhops=None, maxhops=None, ids=False, **filters):
         pass
 
     def values(self, **keys):
@@ -38,13 +38,40 @@ class Traversal:
     def alias(self, name):
         pass
 
-class ObjectDict(dict):
 
+def similar_dict(this, other, ellipsis='...'):
+    """Compare nodes to another dictonary, leaving out the ellipsis"""
+
+    errors = {}
+
+    if not isinstance(other, dict):
+        errors['_not suitable type'] = (type(this), type(other))
+        return False
+
+    if len(this) != len(other):
+        errors['_different len'] = (len(this), len(other))
+
+    for k, v in this.items():
+        if ellipsis and v == ellipsis or other[k] == ellipsis:
+            continue
+        if v != other[k]:
+            errors[k] = (v, other[k])
+
+    if errors:
+        return False  # @@_todo
+    else:
+        return True
+
+
+class ObjectDict(dict):
     __getattr__ = dict.__getitem__
     __setattr__ = dict.__setitem__
     __delattr__ = dict.__delitem__
 
     def _similar_to(self, other, ellipsis='...'):
+        return similar_dict(self, other, ellipsis=ellipsis)
+
+    def _xsimilar_to(self, other, ellipsis='...'):
         """Compare nodes to another dictonary, leaving out the ellipsis"""
 
         errors = {}
@@ -122,7 +149,7 @@ class GraphDB:
     def del_node(self, nodeid):
         pass
 
-    def add_edge(self, source, reltype, target,  **properties):
+    def add_edge(self, _source, _reltype, _target, **properties):
         pass
 
     def update_edge(self, edge:Edge):
@@ -146,7 +173,7 @@ class GraphDB:
     def del_edge_index(self, name):
         pass
 
-    def query_edge(self, **filters):
+    def query_edges(self, *reltypes, **filters):
         pass
 
     def begin(self):
@@ -164,10 +191,5 @@ class GraphDB:
 
 class Traverser(Traversal):
 
-    g:GraphDB = None
-
-    def __init__(self, graph:GraphDB):
-        pass
-
-
-
+    def __init__(self, graphdb: GraphDB):
+        self.g = graphdb
