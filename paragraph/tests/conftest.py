@@ -24,13 +24,16 @@ def testdata(db):
     data.alice = data.db.add_node('Person', name='alice')
     data.bob = data.db.add_node('Person', name='bob')
     data.charlie = data.db.add_node('Person', name='charlie')
+    data.dora = data.db.add_node('Person', name='dora')
     yield data
 
 
 @pytest.fixture()
 def linkeddata(testdata):
-    db = testdata.db
-    db.add_edge(testdata.alice, 'long', testdata.bob)
-    db.add_edge(testdata.bob, 'long', testdata.charlie)
-    db.add_edge(testdata.alice, 'short', testdata.charlie)
-    yield testdata
+    data = testdata
+    db = data.db
+    db.add_edge(data.alice, 'long', data.bob)
+    db.add_edge(data.bob, 'long', data.charlie)
+    db.add_edge(data.alice, 'short', data.charlie)
+    db.add_edge(data.charlie, 'long', data.dora)
+    yield data
