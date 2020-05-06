@@ -4,6 +4,7 @@ from uuid import uuid4
 from neo4j import GraphDatabase
 
 from paragraph.interfaces import GraphDB, Node, Edge
+from paragraph.simpletraverser import SimpleTraverser
 
 
 # @@_todo: uses labels and types for filters
@@ -122,12 +123,10 @@ class NeoGraphDB(GraphDB):
 
     def query_edges(self, *reltypes, **filters):
         relstring = ''
-        print('reltypes', reltypes)
         if reltypes:
             if type(reltypes) not in [list, tuple]:
                 reltypes = [reltypes]
             relstring = ':' + '|'.join(reltypes)
-        print('relstring', relstring)
         for k, v in filters.items():
             filters[k] = self._nodeid(v)
         result = self._run('''with $filters as filters
@@ -165,6 +164,13 @@ class NeoGraphDB(GraphDB):
     def query(self, query):
         pass
 
+    def traverse(self, nodes=None, **filters):
+        if nodes:
+            if type(nodes) != list:
+                nodes = [nodes]
+        else:
+            nodes = self.query_nodes(**filters)
+        return SimpleTraverser(self, nodes)
 
 if __name__ == "__main__":
     db = NeoGraphDB()

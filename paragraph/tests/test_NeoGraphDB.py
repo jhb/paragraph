@@ -92,13 +92,9 @@ def test_delete_edge(db, testdata):
     db.del_edge(testedge._id)
     assert len(db.query_edges(bar='foo')) == 0
 
-
-from paragraph.simpletraverser import SimpleTraverser
-
-
-def test_simpletraverser_oN(linkeddata, db):
+def test_simpletraverser_oN(linkeddata):
     ld = linkeddata
-    t = SimpleTraverser(db, ld.alice)
+    t = ld.db.traverse(ld.alice)
 
     t2 = t.oN()
     assert ld.bob in t2.nodes
@@ -119,8 +115,8 @@ def test_simpletraverser_oN(linkeddata, db):
     assert ld.charlie in t2.nodes
 
 
-def test_simpletraverser_linked(linkeddata, db):
+def test_simpletraverser_linked(linkeddata):
     ld = linkeddata
-    t = SimpleTraverser(db, ld.alice)
+    t = ld.db.traverse(name='alice')
     t2 = t.oN('long').oN('long')
     assert t2.nodes == [ld.charlie]
