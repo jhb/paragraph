@@ -116,29 +116,3 @@ def test_simpletraverser_oN(linkeddata):
     assert ld.charlie in r.nodes
 
 
-def test_simpletraverser_linked(linkeddata):
-    ld = linkeddata
-    db = ld.db
-
-    r = db.traverse(name='alice').oN('long').oN('long')
-    assert r.nodes == [ld.charlie]
-
-
-def test_simpletraverser_minmax(linkeddata):
-    ld = linkeddata
-    db = ld.db
-
-    r = db.traverse(name='alice').oN(minhops=1, maxhops=3)
-    assert r.same_nodes([ld.bob, ld.charlie, ld.dora])
-
-    r = db.traverse(name='alice').oN(minhops=2, maxhops=3)
-    assert r.same_nodes([ld.charlie, ld.dora])
-
-    r = db.traverse(name='alice').oN(minhops=2, maxhops=2)
-    assert r.same_nodes([ld.charlie, ld.dora])
-
-    r = db.traverse(name='alice').oN(minhops=3, maxhops=3)
-    assert r.same_nodes([ld.dora])
-
-    r = db.traverse(name='alice').oN('long', minhops=2, maxhops=2)
-    assert r.same_nodes([ld.charlie])

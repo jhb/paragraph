@@ -69,30 +69,8 @@ class ObjectDict(dict):
     __delattr__ = dict.__delitem__
 
     def _similar_to(self, other, ellipsis='...'):
-        return similar_dict(self, other, ellipsis=ellipsis)
-
-    def _xsimilar_to(self, other, ellipsis='...'):
         """Compare nodes to another dictonary, leaving out the ellipsis"""
-
-        errors = {}
-
-        if not isinstance(other, dict):
-            errors['_not suitable type'] = (type(self), type(other))
-            return False
-
-        if len(self) != len(other):
-            errors['_different len'] = (len(self), len(other))
-
-        for k, v in self.items():
-            if ellipsis and v == ellipsis or other[k] == ellipsis:
-                continue
-            if v != other[k]:
-                errors[k] = (v, other[k])
-
-        if errors:
-            return False  # @@_todo
-        else:
-            return True
+        return similar_dict(self, other, ellipsis=ellipsis)
 
     def __eq__(self, other):
         return self._similar_to(other) == True
@@ -108,6 +86,9 @@ class ObjectDict(dict):
         if '_labels' in data:
             data['_labels'] = set(data['_labels'])
         self.update(data)
+
+    def __hash__(self):
+        return int(self._id, 16)
 
 
 class Node(ObjectDict, Traversal):

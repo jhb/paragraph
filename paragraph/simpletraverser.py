@@ -17,7 +17,15 @@ class SimpleTraverser(Traverser):
             self.resultnodes.update(prev.resultnodes)
             self.resultedges.update(prev.resultnodes)
 
-    def oN(self, *reltypes, minhops=1, maxhops=1, ids=False, **filters):
+        self.nodes_seen = OrderedDict()
+        self.edges_seen = OrderedDict()
+
+        if prev:
+            self.nodes_seen.update(self.prev.nodes_seen)
+            self.edges_seen.update(self.prev.edges_seen)
+
+
+    def oN1(self, *reltypes, minhops=1, maxhops=1, ids=False, **filters):
         localnodes = OrderedDict()
         thisround = OrderedDict({n._id: n for n in self.nodes})
         nextround = OrderedDict()
@@ -38,16 +46,32 @@ class SimpleTraverser(Traverser):
         return SimpleTraverser(self.g, list(localnodes.values()), prev=self)
         # return (list(resultnodes.values()), list(resultedges.values()))
 
-    @property
-    def goodnodes(self):
-        out = OrderedDict()
-        t = self
-        while 1:
-            out.update(t.resultnodes)
-            t = t.prev
-            if t is None:
-                break
-        return list(out.values())
+    def oN(self, *reltypes, minhops=1, maxhops=1, ids=False, **filters ):
+        thisround = OrderedDict({n._id:n for n in self.nodes})
+        nextround = OrderedDict()
+        found = OrderedDict()
+        for i in range(1,maxhops+1):
+            for node in thisround.values():
+                if node._id in self.nodes_seen:
+                    continue
+                else:
+                    self.nodes_seen[node._id] = node
+                edges = self.g.query_edges(*reltypes, _source=node)
+                for edge in edges:
+                    if edge._id in self.edges_seen:
+                        continue
+                    self.edges_seen[edge._id] = edge
+                    target = edge._target
+                    #nextround
+                    if target._id not in self.nodes_seen:
+                        nextround[target._id]=target
+                    #found
+                    if i>=minhops and target._id not in found:
+                        found[target._id]=target
+
+            thisround=nextround
+            nextround=OrderedDict()
+        return SimpleTraverser(self.g, nodes=list(found.values()), prev=self)
 
     def same_nodes(self, othernodes):
         if type(othernodes) != list:
