@@ -20,7 +20,7 @@ class SimpleTraverser(Traverser):
             self.edges_seen.update(self.prev.edges_seen)
 
 
-    def oN(self, other, *reltypes, minhops=1, maxhops=1, ids=False, **filters ):
+    def oN(self, *reltypes, minhops=1, maxhops=1, ids=False,  **filters ):
         thisround = set(self.nodes)
         nextround = set()
         found = set()
