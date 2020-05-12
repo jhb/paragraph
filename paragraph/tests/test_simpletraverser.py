@@ -1,5 +1,5 @@
 
-def test_simpletraverser_linked(linkeddata):
+def test_linked(linkeddata):
     ld = linkeddata
     db = ld.db
 
@@ -7,7 +7,7 @@ def test_simpletraverser_linked(linkeddata):
     assert r.nodes == {ld.charlie}
 
 
-def test_simpletraverser_minmax(linkeddata):
+def test_minmax(linkeddata):
     ld = linkeddata
     db = ld.db
 
@@ -29,14 +29,21 @@ def test_simpletraverser_minmax(linkeddata):
     r = db.traverse(name='alice').oN('long', minhops=2, maxhops=2)
     assert r.nodes == {ld.charlie}
 
-def test_simpletraverser_allnode(linkeddata):
+def test_nodes_seen(linkeddata):
     ld = linkeddata
     db = ld.db
 
     r = db.traverse(name='alice').oN(minhops=2, maxhops=2)
     assert r.nodes == {ld.charlie,ld.dora}
 
-    print(r.nodes_seen)
+    assert r.nodes_seen == {ld.alice,ld.bob,ld.charlie}
+
+def test_backwards(linkeddata):
+    ld = linkeddata
+    db = ld.db
+
+    r = db.traverse(name='dora').iN(minhops=2,maxhops=2)
+    assert r.nodes == {ld.alice,ld.bob}
 
 
 

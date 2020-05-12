@@ -19,8 +19,13 @@ class SimpleTraverser(Traverser):
             self.nodes_seen.update(self.prev.nodes_seen)
             self.edges_seen.update(self.prev.edges_seen)
 
+    def oN(self, *reltypes, minhops=1, maxhops=1, ids=False, **filters):
+        return self._traverseN('_target',*reltypes, minhops=minhops, maxhops=maxhops, ids=ids, **filters)
 
-    def oN(self, *reltypes, minhops=1, maxhops=1, ids=False,  **filters ):
+    def iN(self, *reltypes, minhops=1, maxhops=1, ids=False, **filters):
+        return self._traverseN('_source', *reltypes, minhops=minhops, maxhops=maxhops, ids=ids, **filters)
+
+    def _traverseN(self, otherattribute, *reltypes, minhops=1, maxhops=1, ids=False, **filters):
         thisround = set(self.nodes)
         nextround = set()
         found = set()
@@ -30,27 +35,25 @@ class SimpleTraverser(Traverser):
                     continue
                 else:
                     self.nodes_seen.add(node)
-                edges = self.g.query_edges(*reltypes, _source=node)
+                if otherattribute=='_target':
+                    edges = self.g.query_edges(*reltypes, _source=node)
+                else:
+                    edges = self.g.query_edges(*reltypes, _target=node)
                 for edge in edges:
                     if edge in self.edges_seen:
                         continue
                     self.edges_seen.add(edge)
-                    target = edge._target
+                    other = getattr(edge,otherattribute)
                     #nextround
-                    if target not in self.nodes_seen:
-                        nextround.add(target)
+                    if other not in self.nodes_seen:
+                        nextround.add(other)
                     #found
-                    if i>=minhops and target not in found:
-                        found.add(target)
+                    if i>=minhops and other not in found:
+                        found.add(other)
 
             thisround=nextround
             nextround=set()
         return SimpleTraverser(self.g, nodes=found, prev=self)
-
-    def same_nodes(self, othernodes):
-        if type(othernodes) != list:
-            othernodes = [list]
-        return {n._id for n in self.nodes} == set([n._id for n in othernodes])
 
     def allnodes(self):
         return self.nodes + self.nodes_seen
