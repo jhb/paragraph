@@ -1,4 +1,5 @@
 import json
+from pprint import pprint
 
 
 class ObjectDictEncoder(json.JSONEncoder):
@@ -75,14 +76,6 @@ class ObjectDict(dict):
     def __ne__(self, other):
         return self._similar_to(other) != True
 
-    def to_json(self, indent=2):
-        return json.dumps(self, cls=ObjectDictEncoder, indent=indent)
-
-    def from_json(self, jsondata):
-        data = json.loads(jsondata)
-        if '_labels' in data:
-            data['_labels'] = set(data['_labels'])
-        self.update(data)
 
     def _set(self,k,v):
         self[k]=v
@@ -103,34 +96,43 @@ class Node(ObjectDict, Traversal):
     def __init__(self, *labels, **props):
         super().__init__(**props)
         self.setdefault('_id', None)
-        self.setdefault('_labels', set())
-        self.labels.update(labels)
+        self.labels = set(labels)
         #self.__dict__['labels']=self['_labels'] # 00_label_usage
 
-    labels = property(lambda self: self['_labels'],
-                  lambda self, v: self._set('_labels', v),
-                  lambda self: self._del('_labels'))
+    def to_json(self, indent=None):
+        data = dict(self)
+        data['_labels']=list(self.labels)
+        return json.dumps(data, cls=ObjectDictEncoder, indent=indent)
 
+    def from_json(self, jsondata):
+        data = json.loads(jsondata)
+        if '_labels' in data:
+            self.labels.update(data['_labels'])
+            del data['_labels']
+        self.update(data)
 
 class Edge(ObjectDict, Traversal):
-    def __init__(self, _source=None, _reltype=None, _target=None, **props):
+    def __init__(self, source=None, reltype=None, target=None, **props):
         super().__init__(**props)
         self.setdefault('_id', None)
-        self.setdefault('_source', _source)
-        self.setdefault('_reltype', _reltype)
-        self.setdefault('_target', _target)
+        self.source = source
+        self.reltype = reltype
+        self.target = target
 
-    source = property(lambda self: self['_source'],
-                      lambda self, v: self._set('_source',v),
-                      lambda self: self._del('_source'))
+    def to_json(self, indent=None):
+        data = dict(self)
+        data['_source'] = self.source.id
+        data['_target'] = self.target.id
+        data['_reltype'] = self.reltype
+        return json.dumps(data, cls=ObjectDictEncoder, indent=indent)
 
-    target = property(lambda self: self['_target'],
-                      lambda self, v: self._set('_target',v),
-                      lambda self: self._del('_target'))
-    
-    reltype = property(lambda self: self['_reltype'],
-                      lambda self, v: self._set('_reltype',v),
-                      lambda self: self._del('_reltype'))
+    def from_json(self, jsondata):
+        raise Exception('needs implementation, getting nodes from db')
+        data = json.loads(jsondata)
+        if '_labels' in data:
+            self.labels.update(data['_labels'])
+            del data['_labels']
+        self.update(data)
     
     
     def __repr__(self):

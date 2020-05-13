@@ -51,10 +51,10 @@ class NeoGraphDB(GraphDB):
 
     def _neo2edge(self, relation):
 
-        edge = Edge(_source=self._neo2node(relation.start_node),
-                    _reltype=relation.type,
-                    _target=self._neo2node(relation.end_node))
-        edge.update({k: v for k, v in relation.items() if k not in ['_source', '_target']})
+        edge = Edge(source=self._neo2node(relation.start_node),
+                    reltype=relation.type,
+                    target=self._neo2node(relation.end_node))
+        edge.update(relation.items())
         return edge
 
     def _nodeid(self, nodeid):
@@ -76,19 +76,17 @@ class NeoGraphDB(GraphDB):
         if '_id' not in properties:
             properties['_id'] = self._new_uid()
         labelstring = self._labels2string(labels)
-        props = {k: v for k, v in properties.items() if k not in ['_labels']}
-        result = self._run(f'create (n{labelstring}) set n = $props return n', props=props)
+        result = self._run(f'create (n{labelstring}) set n = $props return n', props=properties)
         return self._neo2node(result.single()['n'])
 
     def update_node(self, node: Node):
         labelstring = self._labels2string(node.labels)
         if labelstring:
             labelstring = 'set n' + labelstring
-        props = {k: v for k, v in node.items() if k not in ['_labels']}
         result = self._run(f'match (n) where n._id=$_id {labelstring} set n=$props return n',
                            labelstring=labelstring,
                            _id=node['_id'],
-                           props=props)
+                           props=dict(node))
         return self._neo2node(result.single()['n'])
 
     def del_node(self, _id, detach=False):
@@ -108,7 +106,6 @@ class NeoGraphDB(GraphDB):
         if '_id' not in properties:
             properties['_id'] = self._new_uid()
         props = dict(properties)
-        props = {k: v for k, v in properties.items() if k not in ['_reltype', '_source', '_target']}
         s_id = self._nodeid(source)
         t_id = self._nodeid(target)
         r = self._run('''match (s) where s._id=$s_id
@@ -119,8 +116,8 @@ class NeoGraphDB(GraphDB):
         return self._neo2edge(r.single()['r'])
 
     def update_edge(self, edge: Edge):
-        props = {k: v for k, v in edge.items() if k not in ['_source', '_reltype', '_target']}
-        r = self._run('''match (s)-[r]->(t) where r._id=$r_id set r = $props return s,r,t''', r_id=edge.id, props=props)
+        r = self._run('''match (s)-[r]->(t) where r._id=$r_id set r = $props return s,r,t''', r_id=edge.id,
+                      props=dict(edge))
         return self._neo2edge(r.single()['r'])
 
     def query_edges(self, *reltypes, source=None, target=None, **filters):

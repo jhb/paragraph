@@ -6,7 +6,8 @@ def test_create_node(db):
     "Create a node"
 
     n = db.add_node('Testlabel', foo='bar')
-    assert n == {'_id': '...', '_labels': {'Testlabel'}, 'foo': 'bar'}
+    assert n == {'_id': '...', 'foo': 'bar'}
+    assert n.labels == {'Testlabel',}
 
 
 def test_update_node(db):
@@ -19,15 +20,17 @@ def test_update_node(db):
 
     n2 = db.update_node(n)
     assert n2 == {'_id':     '...',
-                  '_labels': {'Testlabel2', 'Testlabel'},
                   'foo2':    'bar2',
                   'foo':     'bar'}
+
+    assert n2.labels ==  {'Testlabel2', 'Testlabel'}
 
 
 def test_jsonify_node(testdata):
     "A node can be serialized to python. The set of labels gets converted to a list"
     js = testdata.node.to_json(None)
-    assert js == '''{"_id": "%s", "_labels": ["Testlabel"], "foo": "bar"}''' % testdata.node.id
+    print(js)
+    assert js == '''{"_id": "%s", "foo": "bar", "_labels": ["Testlabel"]}''' % testdata.node.id
 
 
 def test_json_to_node(testdata):
@@ -62,10 +65,10 @@ def test_add_edge(db, testdata):
     "Adding an edge"
     edge1 = db.add_edge(testdata.alice, 'likes', testdata.bob, foo='bar')
     assert edge1 == dict(_id='...',
-                         _source=testdata.alice,
-                         _reltype='likes',
-                         _target=testdata.bob,
                          foo='bar')
+    assert edge1.source == testdata.alice
+    assert edge1.target == testdata.bob
+    assert edge1.reltype == 'likes'
 
 
 def test_update_edge(db, testdata):
@@ -74,10 +77,10 @@ def test_update_edge(db, testdata):
     testedge['foo'] = 'bar2'
     edge2 = db.update_edge(testedge)
     assert edge2 == dict(_id='...',
-                         _source=testdata.alice,
-                         _reltype='test',
-                         _target=testdata.bob,
                          foo='bar2')
+    assert edge2.source == testdata.alice
+    assert edge2.target == testdata.bob
+    assert edge2.reltype == 'test'
 
 
 def test_query_edge(db, testdata):
@@ -97,9 +100,6 @@ def test_delete_edge(db, testdata):
 def test_edge_source_property(linkeddata):
     e1 = linkeddata.e1
     assert e1.source == linkeddata.alice
-    del e1.source
-    with pytest.raises(KeyError):
-        x = e1.source
 
 def test_query_edge_source(db,linkeddata):
     db = linkeddata.db
