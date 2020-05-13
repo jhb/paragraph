@@ -3,14 +3,14 @@ from uuid import uuid4
 
 from neo4j import GraphDatabase
 
-from paragraph.interfaces import GraphDB, Node, Edge
+from paragraph.basic import GraphDB, Node, Edge
 from paragraph.simpletraverser import SimpleTraverser
 
 
 # 00_todo: uses labels and types for filters
 
 
-class NeoGraphDB(GraphDB):
+class NeoGraphDB:
 
     def __init__(self, uri='bolt://localhost:7687', username='', password='', encrypted=False, debug=0):
         """

@@ -1,7 +1,7 @@
 import pytest
 
 from paragraph.NeoGraphDB import NeoGraphDB
-from paragraph.interfaces import ObjectDict
+from paragraph.basic import ObjectDict
 
 
 @pytest.fixture(scope='session')

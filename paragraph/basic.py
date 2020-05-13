@@ -1,6 +1,7 @@
 import json
 from pprint import pprint
 
+# usable classes
 
 class ObjectDictEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -9,35 +10,6 @@ class ObjectDictEncoder(json.JSONEncoder):
         else:
             return json.JSONEncoder.default(self, obj)
 
-
-class Traversal:
-
-    def iN(self, *reltypes, minhops=None, maxhops=None, ids=False, **filters):
-        pass
-
-    def oN(self, *reltypes, minhops=None, maxhops=None, ids=False, **filters):
-        pass
-
-    def iE(self, *reltypes, minhops=None, maxhops=None, ids=False, **filters):
-        pass
-
-    def oE(self, *reltypes, minhops=None, maxhops=None, ids=False, **filters):
-        pass
-
-    def bN(self, *reltypes, minhops=None, maxhops=None, ids=False, **filters):
-        pass
-
-    def bE(self, *reltypes, minhops=None, maxhops=None, ids=False, **filters):
-        pass
-
-    def values(self, **keys):
-        pass
-
-    def paths(self):
-        pass
-
-    def alias(self, name):
-        pass
 
 
 def similar_dict(this, other, ellipsis='...'):
@@ -91,7 +63,7 @@ class ObjectDict(dict):
                   lambda self: self._del('_id'))
 
 
-class Node(ObjectDict, Traversal):
+class Node(ObjectDict):
 
     def __init__(self, db, *labels, **props):
         super().__init__(**props)
@@ -112,7 +84,7 @@ class Node(ObjectDict, Traversal):
             del data['_labels']
         self.update(data)
 
-class Edge(ObjectDict, Traversal):
+class Edge(ObjectDict):
     def __init__(self, db, source=None, reltype=None, target=None, **props):
         super().__init__(**props)
         self.db = db
@@ -147,6 +119,38 @@ class Edge(ObjectDict, Traversal):
         return str(data)
 
 
+# Interfaces
+
+class Traversal:
+
+    def iN(self, *reltypes, minhops=None, maxhops=None, ids=False, **filters):
+        pass
+
+    def oN(self, *reltypes, minhops=None, maxhops=None, ids=False, **filters):
+        pass
+
+    def iE(self, *reltypes, minhops=None, maxhops=None, ids=False, **filters):
+        pass
+
+    def oE(self, *reltypes, minhops=None, maxhops=None, ids=False, **filters):
+        pass
+
+    def bN(self, *reltypes, minhops=None, maxhops=None, ids=False, **filters):
+        pass
+
+    def bE(self, *reltypes, minhops=None, maxhops=None, ids=False, **filters):
+        pass
+
+    def values(self, **keys):
+        pass
+
+    def paths(self):
+        pass
+
+    def alias(self, name):
+        pass
+
+
 class GraphDB:
 
     def __init__(self, **kwargs):
@@ -155,7 +159,7 @@ class GraphDB:
     def add_node(self, *labels, **properties):
         pass
 
-    def update_node(self, node:Node):
+    def update_node(self, node: Node):
         pass
 
     def del_node(self, nodeid):
@@ -164,15 +168,15 @@ class GraphDB:
     def add_edge(self, source, reltype, target, **properties):
         pass
 
-    def update_edge(self, edge:Edge):
+    def update_edge(self, edge: Edge):
         pass
 
     def del_edge(self, edgeid):
         pass
-    
+
     def add_node_index(self, name, index):
         pass
-    
+
     def del_node_index(self, name):
         pass
 
@@ -199,7 +203,3 @@ class GraphDB:
 
     def query(self, query):
         pass
-
-
-class Traverser(Traversal):
-    pass

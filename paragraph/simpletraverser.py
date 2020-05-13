@@ -1,14 +1,14 @@
 from _collections import OrderedDict
 
-from paragraph.interfaces import Traverser, GraphDB
+from paragraph.basic import Traversal, GraphDB
 
 
-class SimpleTraverser(Traverser):
+class SimpleTraverser(Traversal):
 
     def __init__(self, graphdb: GraphDB, nodes, prev=None):
         self.g = graphdb
         if type(nodes) != set and type(nodes) != list:
-            nodes = set([nodes])
+            nodes = {nodes}
         self.nodes = nodes
         self.prev = prev
 

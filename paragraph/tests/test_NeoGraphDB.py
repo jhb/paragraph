@@ -1,6 +1,6 @@
 import pytest
 
-from paragraph.interfaces import Node, Edge
+from paragraph.basic import Node, Edge
 
 def test_create_node(db):
     "Create a node"
@@ -98,7 +98,6 @@ def test_delete_edge(db, testdata):
 def test_jsonify_edge(ld):
     "An edge can be serialized to python. The special properties are set"
     js = ld.e1.to_json(None)
-    print(js)
     assert js == '''{"_id": "%s", "_source": "%s", "_target": "%s", "_reltype": "long"}''' % (
             ld.e1.id,
             ld.alice.id,
