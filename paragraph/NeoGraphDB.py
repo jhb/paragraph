@@ -3,13 +3,14 @@ from uuid import uuid4
 
 from neo4j import GraphDatabase
 
-from paragraph.interfaces import GraphDB, Node, Edge
+from paragraph.basic import GraphDB, Node, Edge
+from paragraph.simpletraverser import SimpleTraverser
 
 
-# @@_todo: uses labels and types for filters
+# 00_todo: uses labels and types for filters
 
 
-class NeoGraphDB(GraphDB):
+class NeoGraphDB:
 
     def __init__(self, uri='bolt://localhost:7687', username='', password='', encrypted=False, debug=0):
         """
@@ -37,22 +38,31 @@ class NeoGraphDB(GraphDB):
     def _run(self, statement, **kwargs):
         tx = self.begin()
         if self.debug:  #
-            print(f'{statement} {kwargs}')  # @@_todo
+            print(f'{statement} {kwargs}')  # 00_todo
+            if self.debug==2:
+                self.debug=0
         return tx.run(statement, **kwargs)
 
     def _neo2node(self, neonode):
-        node = Node()
+        node = Node(self)
         node.update(neonode)
-        node._labels.update(neonode.labels)
+        node.labels.update(neonode.labels)
         return node
 
     def _neo2edge(self, relation):
 
-        edge = Edge(_source=self._neo2node(relation.start_node),
-                    _reltype=relation.type,
-                    _target=self._neo2node(relation.end_node))
-        edge.update(relation)
+        edge = Edge(db = self,
+                    source=self._neo2node(relation.start_node),
+                    reltype=relation.type,
+                    target=self._neo2node(relation.end_node))
+        edge.update(relation.items())
         return edge
+
+    def _nodeid(self, nodeid):
+        if type(nodeid) is Node:
+            return nodeid.id
+        else:
+            return nodeid
 
     def _new_uid(self):
         return uuid4().hex
@@ -71,14 +81,13 @@ class NeoGraphDB(GraphDB):
         return self._neo2node(result.single()['n'])
 
     def update_node(self, node: Node):
-        labelstring = self._labels2string(node._labels)
+        labelstring = self._labels2string(node.labels)
         if labelstring:
             labelstring = 'set n' + labelstring
-        props = {k: v for k, v in node.items() if k not in ['_labels']}
         result = self._run(f'match (n) where n._id=$_id {labelstring} set n=$props return n',
                            labelstring=labelstring,
                            _id=node['_id'],
-                           props=props)
+                           props=dict(node))
         return self._neo2node(result.single()['n'])
 
     def del_node(self, _id, detach=False):
@@ -97,29 +106,48 @@ class NeoGraphDB(GraphDB):
     def add_edge(self, source, reltype, target, **properties):
         if '_id' not in properties:
             properties['_id'] = self._new_uid()
-        if type(source) == Node:
-            source = source._id
-        if type(target) == Node:
-            target = target._id
+        props = dict(properties)
+        s_id = self._nodeid(source)
+        t_id = self._nodeid(target)
         r = self._run('''match (s) where s._id=$s_id
                          match (t) where t._id=$t_id
                          create (s)-[r:%s]->(t) set r = $props return s,r,t
-        ''' % reltype, s_id=source, t_id=target, props=properties)
+        ''' % reltype, s_id=s_id, t_id=t_id, props=props)
 
         return self._neo2edge(r.single()['r'])
 
     def update_edge(self, edge: Edge):
-        props = {k: v for k, v in edge.items() if k not in ['_source', '_reltype', '_target']}
-        r = self._run('match (s)-[r]->(t) where r._id=$r_id set r = $props return s,r,t', r_id=edge._id, props=props)
+        r = self._run('''match (s)-[r]->(t) where r._id=$r_id set r = $props return s,r,t''', r_id=edge.id,
+                      props=dict(edge))
         return self._neo2edge(r.single()['r'])
 
-    def query_edge(self, *reltypes, **filters):
+    def query_edges(self, *reltypes, source=None, target=None, **filters):
+        relstring = ''
+        if reltypes:
+            if type(reltypes) not in [list, tuple]:
+                reltypes = [reltypes]
+            relstring = ':' + '|'.join(reltypes)
+        for k, v in filters.items():
+            filters[k] = self._nodeid(v)
+        wheres = []
+        params = dict(filters=filters)
+        if source:
+            wheres.append('s._id=$_s_id')
+            params['_s_id']=self._nodeid(source)
+        if target:
+            wheres.append('t._id=$_t_id')
+            params['_t_id']=self._nodeid(target)
+        if wheres:
+            wheres.insert(0,'')
+
         result = self._run('''with $filters as filters
-                              match (s)-[r]->(t)
+                              match (s)-[r%s]->(t)
                               WHERE ALL(k in keys(filters) WHERE filters[k] = r[k])
+                              %s
                               return s,r,t
-                              ''',
-                           filters=filters)
+                              ''' % (relstring,' AND '.join(wheres)),
+                           **params
+                           )
         return [self._neo2edge(r['r']) for r in result]
 
     def del_edge(self, edgeid):
@@ -148,6 +176,13 @@ class NeoGraphDB(GraphDB):
     def query(self, query):
         pass
 
+    def traverse(self, nodes=None, **filters):
+        if nodes:
+            if type(nodes) != list:
+                nodes = [nodes]
+        else:
+            nodes = self.query_nodes(**filters)
+        return SimpleTraverser(self, nodes)
 
 if __name__ == "__main__":
     db = NeoGraphDB()

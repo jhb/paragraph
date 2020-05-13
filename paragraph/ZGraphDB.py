@@ -1,4 +1,4 @@
-from paragraph.interfaces import GraphDB
+from paragraph.basic import GraphDB
 
 class ZGraphDB(GraphDB):
 

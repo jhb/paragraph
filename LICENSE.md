@@ -23,5 +23,5 @@ combining it with other code, such other code is not for that reason
 alone subject to any of the requirements of the GNU Affero GPL
 version 3.
 
-See [AGPL.txt](AGPL.txt) and <http://mo.morsi.org/blog/2009/08/13/lesser_affero_gplv3/>
+See [AGPL.txt](AGPL.txt)<!-- @IGNORE PREVIOUS: link --> and <http://mo.morsi.org/blog/2009/08/13/lesser_affero_gplv3/>
 
