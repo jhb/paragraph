@@ -44,14 +44,15 @@ class NeoGraphDB(GraphDB):
         return tx.run(statement, **kwargs)
 
     def _neo2node(self, neonode):
-        node = Node()
+        node = Node(self)
         node.update(neonode)
         node.labels.update(neonode.labels)
         return node
 
     def _neo2edge(self, relation):
 
-        edge = Edge(source=self._neo2node(relation.start_node),
+        edge = Edge(db = self,
+                    source=self._neo2node(relation.start_node),
                     reltype=relation.type,
                     target=self._neo2node(relation.end_node))
         edge.update(relation.items())

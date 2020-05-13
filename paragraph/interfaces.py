@@ -93,8 +93,9 @@ class ObjectDict(dict):
 
 class Node(ObjectDict, Traversal):
 
-    def __init__(self, *labels, **props):
+    def __init__(self, db, *labels, **props):
         super().__init__(**props)
+        self.db=db
         self.setdefault('_id', None)
         self.labels = set(labels)
         #self.__dict__['labels']=self['_labels'] # 00_label_usage
@@ -112,8 +113,9 @@ class Node(ObjectDict, Traversal):
         self.update(data)
 
 class Edge(ObjectDict, Traversal):
-    def __init__(self, source=None, reltype=None, target=None, **props):
+    def __init__(self, db, source=None, reltype=None, target=None, **props):
         super().__init__(**props)
+        self.db = db
         self.setdefault('_id', None)
         self.source = source
         self.reltype = reltype
@@ -127,11 +129,14 @@ class Edge(ObjectDict, Traversal):
         return json.dumps(data, cls=ObjectDictEncoder, indent=indent)
 
     def from_json(self, jsondata):
-        raise Exception('needs implementation, getting nodes from db')
         data = json.loads(jsondata)
-        if '_labels' in data:
-            self.labels.update(data['_labels'])
-            del data['_labels']
+        self.reltype = data['_reltype']
+        self.source = self.db.query_nodes(_id=data['_source'])
+        self.target = self.db.query_nodes(_id=data['_target'])
+
+        del data['_reltype']
+        del data['_source']
+        del data['_target']
         self.update(data)
     
     
