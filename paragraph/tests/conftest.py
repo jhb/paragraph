@@ -29,7 +29,7 @@ def testdata(db):
 
 
 @pytest.fixture()
-def linkeddata(testdata):
+def ld(testdata):
     data = testdata
     db = data.db
     data.e1 = db.add_edge(data.alice, 'long', data.bob)

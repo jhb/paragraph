@@ -1,13 +1,11 @@
-def test_simple_oN(linkeddata):
-    ld = linkeddata
+def test_simple_oN(ld):
     db = ld.db
     t_alice = db.traverse(name='alice')
     r = t_alice.oN('long')
     assert ld.bob in r.nodes
 
 
-def test_oN(linkeddata):
-    ld = linkeddata
+def test_oN(ld):
     db = ld.db
 
     r = db.traverse(name='alice').oN()
@@ -32,16 +30,14 @@ def test_oN(linkeddata):
 
 
 
-def test_linked(linkeddata):
-    ld = linkeddata
+def test_linked(ld):
     db = ld.db
 
     r = db.traverse(name='alice').oN('long').oN('long')
     assert r.nodes == {ld.charlie}
 
 
-def test_minmax(linkeddata):
-    ld = linkeddata
+def test_minmax(ld):
     db = ld.db
 
     r = db.traverse(name='alice').oN(minhops=1, maxhops=3)
@@ -62,8 +58,7 @@ def test_minmax(linkeddata):
     r = db.traverse(name='alice').oN('long', minhops=2, maxhops=2)
     assert r.nodes == {ld.charlie}
 
-def test_nodes_seen(linkeddata):
-    ld = linkeddata
+def test_nodes_seen(ld):
     db = ld.db
 
     r = db.traverse(name='alice').oN(minhops=2, maxhops=2)
@@ -71,8 +66,7 @@ def test_nodes_seen(linkeddata):
 
     assert r.nodes_seen == {ld.alice,ld.bob,ld.charlie}
 
-def test_backwards(linkeddata):
-    ld = linkeddata
+def test_backwards(ld):
     db = ld.db
 
     r = db.traverse(name='dora').iN(minhops=2,maxhops=2)
@@ -80,6 +74,6 @@ def test_backwards(linkeddata):
 
 
 
-def test_set(linkeddata):
+def test_set(ld):
     s = set()
-    s.add(linkeddata.alice)
+    s.add(ld.alice)

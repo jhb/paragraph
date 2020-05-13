@@ -95,33 +95,33 @@ def test_delete_edge(db, testdata):
     db.del_edge(testedge.id)
     assert len(db.query_edges(bar='foo')) == 0
 
-def test_jsonify_edge(linkeddata):
+def test_jsonify_edge(ld):
     "An edge can be serialized to python. The special properties are set"
-    js = linkeddata.e1.to_json(None)
+    js = ld.e1.to_json(None)
     print(js)
     assert js == '''{"_id": "%s", "_source": "%s", "_target": "%s", "_reltype": "long"}''' % (
-                    linkeddata.e1.id,
-                    linkeddata.alice.id,
-                    linkeddata.bob.id)
+            ld.e1.id,
+            ld.alice.id,
+            ld.bob.id)
 
-def test_json_to_edge(linkeddata):
+def test_json_to_edge(ld):
     js = '''{"_id": "%s", "_source": "%s", "_target": "%s", "_reltype": "long"}''' % (
-            linkeddata.e1.id,
-            linkeddata.alice.id,
-            linkeddata.bob.id)
-    edge = Edge(linkeddata.db)
+            ld.e1.id,
+            ld.alice.id,
+            ld.bob.id)
+    edge = Edge(ld.db)
     edge.from_json(js)
-    assert edge == linkeddata.e1
+    assert edge == ld.e1
 
 
 
-def test_edge_source_property(linkeddata):
-    e1 = linkeddata.e1
-    assert e1.source == linkeddata.alice
+def test_edge_source_property(ld):
+    e1 = ld.e1
+    assert e1.source == ld.alice
 
-def test_query_edge_source(db,linkeddata):
-    db = linkeddata.db
-    r = db.query_edges(source=linkeddata.bob)
-    assert r == [linkeddata.e2]
+def test_query_edge_source(db, ld):
+    db = ld.db
+    r = db.query_edges(source=ld.bob)
+    assert r == [ld.e2]
 
 
