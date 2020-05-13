@@ -67,6 +67,7 @@ def test_add_edge(db, testdata):
     assert edge1.source == testdata.alice
     assert edge1.target == testdata.bob
     assert edge1.reltype == 'likes'
+    assert edge1['foo'] == 'bar'
 
 
 def test_update_edge(db, testdata):
