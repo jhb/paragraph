@@ -32,8 +32,8 @@ def testdata(db):
 def linkeddata(testdata):
     data = testdata
     db = data.db
-    db.add_edge(data.alice, 'long', data.bob)
-    db.add_edge(data.bob, 'long', data.charlie)
-    db.add_edge(data.alice, 'short', data.charlie)
-    db.add_edge(data.charlie, 'long', data.dora)
+    data.e1 = db.add_edge(data.alice, 'long', data.bob)
+    data.e2 = db.add_edge(data.bob, 'long', data.charlie)
+    data.e4 = db.add_edge(data.alice, 'short', data.charlie)
+    data.e3 = db.add_edge(data.charlie, 'long', data.dora)
     yield data

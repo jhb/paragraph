@@ -58,15 +58,12 @@ def similar_dict(this, other, ellipsis='...'):
             errors[k] = (v, other[k])
 
     if errors:
-        return False  # @@_todo
+        return False  # 00_todo
     else:
         return True
 
 
 class ObjectDict(dict):
-    __getattr__ = dict.__getitem__
-    __setattr__ = dict.__setitem__
-    __delattr__ = dict.__delitem__
 
     def _similar_to(self, other, ellipsis='...'):
         """Compare nodes to another dictonary, leaving out the ellipsis"""
@@ -87,8 +84,18 @@ class ObjectDict(dict):
             data['_labels'] = set(data['_labels'])
         self.update(data)
 
+    def _set(self,k,v):
+        self[k]=v
+
+    def _del(self,k):
+        del(self[k])
+
     def __hash__(self):
-        return int(self._id, 16)
+        return int(self.id, 16)
+    
+    id = property(lambda self: self['_id'],
+                  lambda self, v: self._set('_id',v),
+                  lambda self: self._del('_id'))
 
 
 class Node(ObjectDict, Traversal):
@@ -97,8 +104,12 @@ class Node(ObjectDict, Traversal):
         super().__init__(**props)
         self.setdefault('_id', None)
         self.setdefault('_labels', set())
-        self._labels.update(labels)
-        # self.__dict__['labels']=self['_labels'] # @@_label_usage
+        self.labels.update(labels)
+        #self.__dict__['labels']=self['_labels'] # 00_label_usage
+
+    labels = property(lambda self: self['_labels'],
+                  lambda self, v: self._set('_labels', v),
+                  lambda self: self._del('_labels'))
 
 
 class Edge(ObjectDict, Traversal):
@@ -109,10 +120,23 @@ class Edge(ObjectDict, Traversal):
         self.setdefault('_reltype', _reltype)
         self.setdefault('_target', _target)
 
+    source = property(lambda self: self['_source'],
+                      lambda self, v: self._set('_source',v),
+                      lambda self: self._del('_source'))
+
+    target = property(lambda self: self['_target'],
+                      lambda self, v: self._set('_target',v),
+                      lambda self: self._del('_target'))
+    
+    reltype = property(lambda self: self['_reltype'],
+                      lambda self, v: self._set('_reltype',v),
+                      lambda self: self._del('_reltype'))
+    
+    
     def __repr__(self):
         data = dict(self.items())
-        data['_source'] = self._source._id
-        data['_target'] = self._target._id
+        data['_source'] = self.source.id
+        data['_target'] = self.target.id
         return str(data)
 
 

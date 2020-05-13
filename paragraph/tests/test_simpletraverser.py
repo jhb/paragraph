@@ -1,3 +1,36 @@
+def test_simple_oN(linkeddata):
+    ld = linkeddata
+    db = ld.db
+    t_alice = db.traverse(name='alice')
+    r = t_alice.oN('long')
+    assert ld.bob in r.nodes
+
+
+def test_oN(linkeddata):
+    ld = linkeddata
+    db = ld.db
+
+    r = db.traverse(name='alice').oN()
+    assert ld.bob in r.nodes
+    assert ld.charlie in r.nodes
+
+    r = db.traverse(name='alice').oN('long')
+    assert ld.charlie not in r.nodes
+
+    r = db.traverse(name='alice').oN('long', maxhops=2)
+    assert ld.bob in r.nodes
+    assert ld.charlie in r.nodes
+
+    r = db.traverse(name='alice').oN('long', maxhops=1)
+    assert ld.bob in r.nodes
+    assert ld.charlie not in r.nodes
+
+    r = db.traverse(name='alice').oN('short')
+    assert ld.bob not in r.nodes
+    assert ld.charlie in r.nodes
+
+
+
 
 def test_linked(linkeddata):
     ld = linkeddata

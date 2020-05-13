@@ -20,10 +20,10 @@ class SimpleTraverser(Traverser):
             self.edges_seen.update(self.prev.edges_seen)
 
     def oN(self, *reltypes, minhops=1, maxhops=1, ids=False, **filters):
-        return self._traverseN('_target',*reltypes, minhops=minhops, maxhops=maxhops, ids=ids, **filters)
+        return self._traverseN('target',*reltypes, minhops=minhops, maxhops=maxhops, ids=ids, **filters)
 
     def iN(self, *reltypes, minhops=1, maxhops=1, ids=False, **filters):
-        return self._traverseN('_source', *reltypes, minhops=minhops, maxhops=maxhops, ids=ids, **filters)
+        return self._traverseN('source', *reltypes, minhops=minhops, maxhops=maxhops, ids=ids, **filters)
 
     def _traverseN(self, otherattribute, *reltypes, minhops=1, maxhops=1, ids=False, **filters):
         thisround = set(self.nodes)
@@ -35,10 +35,10 @@ class SimpleTraverser(Traverser):
                     continue
                 else:
                     self.nodes_seen.add(node)
-                if otherattribute=='_target':
-                    edges = self.g.query_edges(*reltypes, _source=node)
+                if otherattribute=='target':
+                    edges = self.g.query_edges(*reltypes, source=node)
                 else:
-                    edges = self.g.query_edges(*reltypes, _target=node)
+                    edges = self.g.query_edges(*reltypes, target=node)
                 for edge in edges:
                     if edge in self.edges_seen:
                         continue
