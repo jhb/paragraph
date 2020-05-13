@@ -113,10 +113,8 @@ class Edge(ObjectDict):
     
     
     def __repr__(self):
-        data = dict(self.items())
-        data['_source'] = self.source.id
-        data['_target'] = self.target.id
-        return str(data)
+        return "<Edge(%s(...),'%s','%s','%s')>" % (type(self.db).__name__,self.source.id,self.reltype,self.target.id)
+
 
 
 # Interfaces
