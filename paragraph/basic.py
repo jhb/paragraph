@@ -84,6 +84,17 @@ class Node(ObjectDict):
             del data['_labels']
         self.update(data)
 
+    def oN(self, *reltypes, minhops=1, maxhops=1, ids=False, **filters):
+        return self.db.traverse(self).oN(*reltypes,minhops=minhops,maxhops=maxhops,ids=ids,**filters)
+
+    def iN(self, *reltypes, minhops=1, maxhops=1, ids=False, **filters):
+        return self.db.traverse(self).iN(*reltypes,minhops,maxhops,ids,**filters)
+
+
+    def __repr__(self):
+        return "<Node(i='%s','%s')>" % (self.id[:6],
+                                        ','.join(sorted(list(self.labels))))
+
 class Edge(ObjectDict):
     def __init__(self, db, source=None, reltype=None, target=None, **props):
         super().__init__(**props)
@@ -113,7 +124,10 @@ class Edge(ObjectDict):
     
     
     def __repr__(self):
-        return "<Edge(%s(...),'%s','%s','%s')>" % (type(self.db).__name__,self.source.id,self.reltype,self.target.id)
+        return "<Edge(i='%s',s='%s',r='%s',t='%s')>" % (self.id[:6],
+                                                   self.source.id[:6],
+                                                   self.reltype,
+                                                   self.target.id[:6])
 
 
 

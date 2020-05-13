@@ -9,10 +9,8 @@ Usage example from neo4j:
 
 Alice is a node. Nodes have a unique id and labels:
 
-    >>> alice.id
-    '...'
-    >>> alice.labels
-    {'Person'}
+    >>> alice
+    <Node(i='...','Person')>
 
 But a note also stores properties like a dictionary:
 
@@ -42,6 +40,13 @@ Now lets link alice to bob:
 And again, all other properties are stored dictionary-style in the edge:
 
     >>> edge
-    <Edge(NeoGraphDB(...),'...','friend_of','...')>
+    <Edge(i='...',s='...',r='friend_of',t='...')>
     >>> dict(edge)
     {'_id': '...', 'foo': 'bar'}
+
+Lets move from alice one hop outwards:
+
+    >>> nodes = alice.oN('friend_of').nodes
+    >>> nodes == {bob}
+    True
+
