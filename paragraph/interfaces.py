@@ -161,7 +161,7 @@ class GraphDB:
     def del_node(self, nodeid):
         pass
 
-    def add_edge(self, _source, _reltype, _target, **properties):
+    def add_edge(self, source, reltype, target, **properties):
         pass
 
     def update_edge(self, edge:Edge):
