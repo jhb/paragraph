@@ -34,7 +34,11 @@ class TalTemplates:
             return TalTemplateWrapper(templates['ajax'], ajaxcontent=ajaxcontent, flask=flask, templates=templates,
                                       ajax=True)
         else:
-            return TalTemplateWrapper(templates[item], flask=flask, templates=templates, ajax=False)
+            return TalTemplateWrapper(templates[item],
+                                      flask=flask,
+                                      templates=templates,
+                                      request=req,
+                                      ajax=False)
 
     def __getattr__(self, item):
         return self[item]

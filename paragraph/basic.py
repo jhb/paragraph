@@ -92,8 +92,9 @@ class Node(ObjectDict):
 
 
     def __repr__(self):
-        return "<Node(i='%s','%s')>" % (self.id[:6],
-                                        ','.join(sorted(list(self.labels))))
+        return "<Node(i='%s','%s') %s>" % (self.id[:6],
+                                        ','.join(sorted(list(self.labels))),
+                                        ', '.join('%s=%s' % i for i in self.items() if i[0] != '_id'))
 
 class Edge(ObjectDict):
     def __init__(self, db, source=None, reltype=None, target=None, **props):
@@ -124,10 +125,11 @@ class Edge(ObjectDict):
     
     
     def __repr__(self):
-        return "<Edge(i='%s',s='%s',r='%s',t='%s')>" % (self.id[:6],
+        return "<Edge(i='%s',s='%s',r='%s',t='%s' %s)>" % (self.id[:6],
                                                    self.source.id[:6],
                                                    self.reltype,
-                                                   self.target.id[:6])
+                                                   self.target.id[:6],
+                                                   ', '.join('%s=%s' % i for i in self.items() if i[0] != '_id'))
 
 
 

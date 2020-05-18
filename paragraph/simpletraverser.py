@@ -56,4 +56,8 @@ class SimpleTraverser(Traversal):
         return SimpleTraverser(self.g, nodes=found, prev=self)
 
     def allnodes(self):
-        return self.nodes + self.nodes_seen
+        return self.nodes | self.nodes_seen
+
+    @property
+    def edges(self):
+        return self.edges_seen

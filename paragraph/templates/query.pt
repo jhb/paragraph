@@ -1,0 +1,102 @@
+<c tal:define='main load:main.pt' metal:use-macro="main">
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <title metal:fill-slot="title">Query</title>
+        <span tal:omit-tag="" metal:fill-slot="headslot">
+            <script src="/static/codemirror.js"></script>
+            <link rel="stylesheet" href="/static/codemirror.css">
+            <script src="/static/python.js"></script>
+
+            <style>
+            .CodeMirror{border: 1px solid black;
+                        height: 15em;
+                        width: 80em}
+            .code { counter-reset: listing;
+                    border: 1px dashed grey;
+                    padding: 2px;
+                    width: 100%;}
+            code { counter-increment: listing; }
+            .code code:before {
+                content: counter(listing) "";
+                color: #AAAAAA;
+                display: inline-block;
+                min-width: 2em;
+                background-color: #F7F7F7;
+                border-right: 1px solid #DDDDDD;
+                text-align: right;
+                margin-right: 0.5em;
+               }
+            .error {border: 1px dashed red}
+        </style>
+
+
+        </span>
+    </head>
+    <body>
+
+    <span metal:fill-slot="content" tal:omit-tag="">
+<span metal:define-macro="ajax" tal:omit-tag="">
+    Nodes:
+
+    <ul>
+        <li tal:repeat="node result.nodes">
+            ${node}
+        </li>
+    </ul>
+
+    Edges:
+
+    <ul>
+        <li tal:repeat="edge result.edges">
+            ${edge}
+        </li>
+    </ul>
+
+    Data:
+    <ul>
+        <li tal:repeat="item result.items()">
+            ${item[0]}: <i>${item[1]}</i>
+        </li>
+    </ul>
+    Printed:
+    <pre style="margin-left: 4em">${printvalue}</pre>
+<form action="/query" id='codeform'>
+    <input type='hidden' name='lastline' id='lastline'>
+    <input type='hidden' name='lastch' id='lastch'>
+    <textarea id="codeeditor" name="statement" cols="80" rows="5"
+    tal:content="request.values.get('statement','')"></textarea><br>
+    <input type="submit">
+
+</form>
+    <c tal:condition="request.values.get('lastline')"
+        tal:replace="structure string:<script>var lastline=${request.values.get('lastline')};var lastch=${request.values.get('lastch')};</script>" />
+    <script>
+        var codeeditor = document.getElementById("codeeditor");
+        var doc = CodeMirror.fromTextArea(codeeditor,{'mode':'python',
+                                                      'autofocus':true,
+                                                      'indentUnit':4,
+                                                      'lineNumbers':1,});
+        doc.setCursor(lastline,lastch);
+
+        function storePos() {
+            pos = doc.getCursor();
+            document.getElementById('lastline').value=pos.line;
+            document.getElementById('lastch').value=pos.ch;
+
+        }
+        doc.addKeyMap({"Ctrl-Enter":function(cm) {
+            storePos();
+            document.forms['codeform'].submit();
+        }})
+
+        document.forms['codeform'].onsubmit=function(){
+            storePos();
+        }
+    </script>
+</span>
+</span>
+
+    </body>
+    </html>
+</c>

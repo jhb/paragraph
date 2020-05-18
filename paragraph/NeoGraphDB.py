@@ -173,8 +173,8 @@ class NeoGraphDB:
         self.tx.rollback()
         self.tx = None
 
-    def query(self, query):
-        pass
+    def query(self, statement, **params):
+        return self._run(statement,**params)
 
     def traverse(self, nodes=None, **filters):
         if nodes:
