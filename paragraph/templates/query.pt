@@ -54,11 +54,17 @@
     </ul>
 
     Data:
-    <ul>
-        <li tal:repeat="item result.items()">
-            ${item[0]}: <i>${item[1]}</i>
-        </li>
-    </ul>
+    <table tal:condition="result.data" border="1" style=" margin-left: 4em">
+        <tr>
+           <th tal:repeat="key result.data[0].keys()" tal:content="key"></th>
+        </tr>
+
+        <tr tal:repeat="row result.data">
+            <td tal:repeat="key row.keys()" tal:content="row[key]"></td>
+        </tr>
+
+    </table>
+
     Printed:
     <pre style="margin-left: 4em">${printvalue}</pre>
 <form action="/query" id='codeform'>

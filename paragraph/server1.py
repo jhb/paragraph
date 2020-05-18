@@ -1,3 +1,6 @@
+import abc
+from collections import UserList, OrderedDict
+
 from flask import Flask, request
 from paragraph.NeoGraphDB import NeoGraphDB
 from paragraph.simpletraverser import SimpleTraverser
@@ -21,10 +24,17 @@ class ResultWrapper:
     def __init__(self,data):
         if type(data) in [neo4j.BoltStatementResult]:
             result = data
-            data = ObjectDict()
-            for r in result:
-                for key in r.keys():
-                    data.setdefault(key,[]).append(r[key])
+            data = UserList()
+            for row in result:
+                rowdict = OrderedDict()
+                for key in row.keys():
+                    value = row[key]
+                    if type(value) == neo4j.Node:
+                        value = db._neo2node(value)
+                    elif type(value) in [neo4j.Relationship] or hasattr(value,'start_node'): # neo4j, I love you
+                        value = db._neo2edge(value)
+                    rowdict[key]=value
+                data.append(rowdict)
             graph = result.graph()
             data.nodes = []
             data.edges = []
@@ -83,46 +93,6 @@ def query():
     else:
         printvalue = ''
     return templates.query(db=db,result=ResultWrapper(result),ObjectDict=ObjectDict,printvalue=printvalue)
-
-
-def magichands(self):
-    context = self.context
-    self.lastoutput = ''
-    self.lastcode = ''
-    self.haserror = 0
-
-    printed = StringIO()
-    if self.request.method.lower() == 'post':
-        code = self.request.code
-        vars = globals()
-        stdout = sys.stdout
-        vars['printed'] = printed
-        vars['context'] = context
-        vars['request'] = context.REQUEST
-        vars['response'] = context.REQUEST.RESPONSE
-        vars['sysout'] = stdout
-        # newcode = "import sys; sys.stdout=printed\n\n" + code.replace('\r','')
-        newcode = code.replace('\r', '')
-        try:
-            sys.stdout = printed
-            exec(newcode, vars)
-            self.lastoutput = vars.get('output', vars['printed'].getvalue())
-            sys.stdout = stdout
-        except Exception as e:
-            self.haserror = 1
-            sys.stdout = stdout
-            exinfo = sys.exc_info()
-            top = exinfo[2]
-            line = '?? - see below'
-            if top.tb_next:
-                top = exinfo[2].tb_next
-                line = top.tb_lineno
-            self.lastoutput = vars['printed'].getvalue()
-            self.lastoutput += """\n== Error on input line %s ==\n%s: %s\n""" % (line, e.__class__.__name__, str(e))
-        finally:
-            sys.stdout = stdout
-        self.lastcode = code
-    return ViewPageTemplateFile('magichands.pt')(self)
 
 
 if __name__ == '__main__':
