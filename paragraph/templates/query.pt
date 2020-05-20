@@ -51,7 +51,12 @@
             <textarea id="codeeditor" name="statement" cols="60" rows="5"
                  tal:define="statement request.values.get('statement')"
                  tal:content="statement and statement or default">#result = db.traverse().oN()
-        result = db.query('match (n)-[r*1..2]->(m) return n, "foo", r, m')</textarea><br>
+result = db.query('match (n)-[r*1..2]->(m) return n, "foo", r, m')
+for row in result.rows:
+    print(row['n'].get('name','no name'))
+print('\nnow continue working with the result')
+print(result.rows[0]['n'].oN().nodes)
+</textarea><br>
             <input type="submit">
 
         </form>
@@ -70,7 +75,7 @@
                 <div>&nbsp;</div>
                  <div class="mermaid" tal:condition="result.nodes or result.edges">
                   graph TD
-                     <span tal:omit-tag="" tal:repeat="node result.nodes">n${node.id[:6]}(${', '.join(list(node.labels))} <br/>${node.get("name",'no name')})</span>
+                     <span tal:omit-tag="" tal:repeat="node result.allnodes().nodes">n${node.id[:6]}(${', '.join(list(node.labels))} <br/>${node.get("name",'no name')})</span>
                      <span tal:omit-tag="" tal:repeat="edge result.edges">n${edge.source.id[:6]}-- ${edge.reltype}-->n${edge.target.id[:6]}</span>
 
                   </div>

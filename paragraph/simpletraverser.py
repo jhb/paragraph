@@ -58,7 +58,7 @@ class SimpleTraverser(ResultWrapper):
         return SimpleTraverser(self.g, nodes=found, prev=self)
 
     def allnodes(self):
-        return self.nodes | self.nodes_seen
+        return SimpleTraverser(self.g, set(self.nodes) | set(self.nodes_seen),prev=self)
 
 
 
