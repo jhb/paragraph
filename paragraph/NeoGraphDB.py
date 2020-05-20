@@ -205,20 +205,11 @@ class NeoGraphDB:
 class Neo4jWrapper(ResultWrapper):
 
     def _prepare(self):
-        resulttype = type(self.result)
-        if resulttype in [BoltStatementResult]:
-            for r in self.result:
-                self.rows.append(self.db._recursive_replace(r))
-            graph = self.result.graph()
-            self.nodes = [self.db._recursive_replace(n) for n in graph.nodes]
-            self.edges = [self.db._recursive_replace(e) for e in graph.relationships]
-        elif resulttype in [SimpleTraverser] or isinstance(self.result, ResultWrapper):
-            self.nodes = self.result.nodes
-            self.edges = self.result.edges
-            self.rows = self.result.rows
-        else:
-            pass
-
+        for r in self.result:
+            self.rows.append(self.db._recursive_replace(r))
+        graph = self.result.graph()
+        self.nodes = [self.db._recursive_replace(n) for n in graph.nodes]
+        self.edges = [self.db._recursive_replace(e) for e in graph.relationships]
 
 
 if __name__ == "__main__":
