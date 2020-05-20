@@ -126,6 +126,6 @@ def test_query_edge_source(db, ld):
 
 def test_query(db):
     r = db.query('match (n) return count(n) as c')
-    assert r.single()['c']==0
+    assert r.rows[0]['c']==0
 
 

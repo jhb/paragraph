@@ -1,11 +1,12 @@
 from _collections import OrderedDict
 
-from paragraph.basic import Traversal, GraphDB
+from paragraph.basic import Traversal, GraphDB, ResultWrapper
 
 
-class SimpleTraverser(Traversal):
+class SimpleTraverser(ResultWrapper):
 
     def __init__(self, graphdb: GraphDB, nodes, prev=None):
+        self.rows = []
         self.g = graphdb
         if type(nodes) != set and type(nodes) != list:
             nodes = {nodes}
@@ -14,6 +15,7 @@ class SimpleTraverser(Traversal):
 
         self.nodes_seen = set()
         self.edges_seen = set()
+        self.edges = self.edges_seen
 
         if prev:
             self.nodes_seen.update(self.prev.nodes_seen)
@@ -58,6 +60,6 @@ class SimpleTraverser(Traversal):
     def allnodes(self):
         return self.nodes | self.nodes_seen
 
-    @property
-    def edges(self):
-        return self.edges_seen
+
+
+

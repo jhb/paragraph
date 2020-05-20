@@ -132,6 +132,27 @@ class Edge(ObjectDict):
                                                    ', '.join('%s=%s' % i for i in self.items() if i[0] != '_id'))
 
 
+class ResultWrapper:
+
+    def __init__(self, result, db=None):
+        self.result = result
+        self.db = db
+        self.rows = [] # should be filled / overwritten
+        self.nodes = []
+        self.edges = []
+        self._prepare()
+
+    def _prepare(self):
+        objecttype = type(self.result)
+        if objecttype in [list,tuple]:
+            self.rows = [{'value':l} for l in self.result]
+        elif hasattr(self.result, 'keys'):
+            self.rows = [self.result]
+        elif self.result is None:
+            self.rows = []
+        else:
+            self.rows = [dict(value=self.result)]
+
 
 # Interfaces
 

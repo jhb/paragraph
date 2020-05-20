@@ -7,11 +7,12 @@
             <script src="/static/codemirror.js"></script>
             <link rel="stylesheet" href="/static/codemirror.css">
             <script src="/static/python.js"></script>
+            <script src="/static/mermaid.min.js"></script>
 
             <style>
             .CodeMirror{border: 1px solid black;
                         height: 15em;
-                        width: 80em}
+                        width: 60em}
             .code { counter-reset: listing;
                     border: 1px dashed grey;
                     padding: 2px;
@@ -36,71 +37,91 @@
     <body>
 
     <span metal:fill-slot="content" tal:omit-tag="">
-<span metal:define-macro="ajax" tal:omit-tag="">
-    Nodes:
+    <span metal:define-macro="ajax" tal:omit-tag="">
 
-    <ul>
-        <li tal:repeat="node result.nodes">
-            ${node}
-        </li>
-    </ul>
+        <form action="/query" id='codeform'>
+            <input type='hidden' name='lastline' id='lastline'>
+            <input type='hidden' name='lastch' id='lastch'>
+            <textarea id="codeeditor" name="statement" cols="60" rows="5"
+                 tal:define="statement request.values.get('statement')"
+                 tal:content="statement and statement or default">#result = db.traverse().oN()
+        result = db.query('match (n)-[r*1..2]->(m) return n, "foo", r, m')</textarea><br>
+            <input type="submit">
 
-    Edges:
+        </form>
+        <div>&nbsp;</div>
+        <div>
+            <b>Nodes</b>:
 
-    <ul>
-        <li tal:repeat="edge result.edges">
-            ${edge}
-        </li>
-    </ul>
+            <ul>
+                <li tal:repeat="node result.nodes">
+                    ${node}
+                </li>
+            </ul>
+        </div>
+        <div>
+            <b>Edges:</b>
 
-    Data:
-    <table tal:condition="result.data" border="1" style=" margin-left: 4em">
-        <tr>
-           <th tal:repeat="key result.data[0].keys()" tal:content="key"></th>
-        </tr>
+            <ul>
+                <li tal:repeat="edge result.edges">
+                    ${edge}
+                </li>
+            </ul>
+        </div>
+        <div>
+     <div class="mermaid" tal:condition="result.nodes or result.edges">
+      graph TD
+         <span tal:omit-tag="" tal:repeat="node result.nodes">n${node.id[:6]}(${', '.join(list(node.labels))} <br/>${node.get("name",'no name')})</span>
+         <span tal:omit-tag="" tal:repeat="edge result.edges">n${edge.source.id[:6]}-- ${edge.reltype}-->n${edge.target.id[:6]}</span>
 
-        <tr tal:repeat="row result.data">
-            <td tal:repeat="key row.keys()" tal:content="row[key]"></td>
-        </tr>
+      </div>
 
-    </table>
+        </div>
+        <div>
+            <b>Data:</b>
 
-    Printed:
-    <pre style="margin-left: 4em">${printvalue}</pre>
-<form action="/query" id='codeform'>
-    <input type='hidden' name='lastline' id='lastline'>
-    <input type='hidden' name='lastch' id='lastch'>
-    <textarea id="codeeditor" name="statement" cols="80" rows="5"
-    tal:content="request.values.get('statement','')"></textarea><br>
-    <input type="submit">
+            <table tal:condition="result.rows" border="1" style=" margin-left: 4em; width:50em">
+                <tr>
+                   <th tal:repeat="key result.rows[0].keys()" tal:content="key"></th>
+                </tr>
 
-</form>
-    <c tal:condition="request.values.get('lastline')"
-        tal:replace="structure string:<script>var lastline=${request.values.get('lastline')};var lastch=${request.values.get('lastch')};</script>" />
-    <script>
-        var codeeditor = document.getElementById("codeeditor");
-        var doc = CodeMirror.fromTextArea(codeeditor,{'mode':'python',
-                                                      'autofocus':true,
-                                                      'indentUnit':4,
-                                                      'lineNumbers':1,});
-        doc.setCursor(lastline,lastch);
+                <tr tal:repeat="row result.rows">
+                    <td tal:repeat="key row.keys()" tal:content="row[key]"></td>
+                </tr>
+            </table>
+        </div>
+        <div>
+            Printed:
+            <pre style="margin-left: 4em">${printvalue}</pre>
+        </div>
 
-        function storePos() {
-            pos = doc.getCursor();
-            document.getElementById('lastline').value=pos.line;
-            document.getElementById('lastch').value=pos.ch;
+        <c tal:condition="request.values.get('lastline')"
+             tal:replace="structure string:<script>var lastline=${request.values.get('lastline',0)};var lastch=${request.values.get('lastch',0)};</script>" />
+        <script>
+            var codeeditor = document.getElementById("codeeditor");
+            var doc = CodeMirror.fromTextArea(codeeditor,{'mode':'python',
+                'autofocus':true,
+                'indentUnit':4,
+                'lineNumbers':1,});
+            doc.setCursor(parseInt(lastline) | 0 ,parseInt(lastch) | 0);
 
-        }
-        doc.addKeyMap({"Ctrl-Enter":function(cm) {
-            storePos();
-            document.forms['codeform'].submit();
-        }})
+            function storePos() {
+                pos = doc.getCursor();
+                document.getElementById('lastline').value=pos.line;
+                document.getElementById('lastch').value=pos.ch;
 
-        document.forms['codeform'].onsubmit=function(){
-            storePos();
-        }
-    </script>
-</span>
+            }
+            doc.addKeyMap({"Ctrl-Enter":function(cm) {
+                    storePos();
+                    document.forms['codeform'].submit();
+                }})
+
+            document.forms['codeform'].onsubmit=function(){
+                storePos();
+            }
+            mermaid.initialize({startOnLoad:true});
+        </script>
+    </span>
 </span>
 
     </body>

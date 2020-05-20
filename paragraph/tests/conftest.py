@@ -11,6 +11,8 @@ def neograph():
 
 @pytest.fixture()
 def db(neograph):
+    neograph.query('match (n) detach delete n') # 00_testdb 00_todo We need a proper test setup, this will
+                                                # kill us on larger databases
     yield neograph
     print('')
     neograph.rollback()
