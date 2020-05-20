@@ -1,5 +1,9 @@
 import abc
 from collections import UserList, OrderedDict, UserDict
+import mimetypes
+mimetypes.add_type('text/css', '.css')
+mimetypes.add_type('text/javascript', '.js')
+
 
 from flask import Flask, request
 from paragraph.NeoGraphDB import NeoGraphDB

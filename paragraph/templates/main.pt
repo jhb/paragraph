@@ -4,12 +4,14 @@
         <title metal:define-slot="title">main</title>
         <style>
             html, body {
-                height: 98vh
+                height: 98vh;
+                padding-left: 1em;
+                padding-top: 0.5em;
             }
         </style>
-        <script src="/static/jquery-3.5.0.min.js"></script>
-        <script src="/static/paragraph.js"></script>
-        <link rel="shortcut icon" href="${ flask.url_for('static', filename='favicon.ico') }" />
+        <script src="${flask.url_for('static', filename='jquery-3.5.0.min.js')}"></script>
+        <script src="${flask.url_for('static', filename='paragraph.js')}"></script>
+        <link rel="shortcut icon" href="${flask.url_for('static', filename='favicon.ico')}" />
         <c metal:define-slot="headslot" tal:omit-tag=""></c>
     </head>
     <body>

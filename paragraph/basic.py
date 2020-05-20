@@ -125,7 +125,7 @@ class Edge(ObjectDict):
     
     
     def __repr__(self):
-        return "<Edge(i='%s',s='%s',r='%s',t='%s' %s)>" % (self.id[:6],
+        return "<Edge(i='%s',s='%s',r='%s',t='%s') %s>" % (self.id[:6],
                                                    self.source.id[:6],
                                                    self.reltype,
                                                    self.target.id[:6],
