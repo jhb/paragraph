@@ -1,0 +1,129 @@
+<c tal:define='main load:main.pt' metal:use-macro="main">
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <title metal:fill-slot="title">Query</title>
+        <span tal:omit-tag="" metal:fill-slot="headslot">
+            <script src="/static/codemirror.js"></script>
+            <link rel="stylesheet" href="/static/codemirror.css">
+            <script src="/static/python.js"></script>
+            <script src="/static/mermaid.min.js"></script>
+
+            <style>
+            .CodeMirror{border: 1px solid black;
+                        height: 15em;
+                        width: 60em}
+            .code { counter-reset: listing;
+                    border: 1px dashed grey;
+                    padding: 2px;
+                    width: 100%;}
+            code { counter-increment: listing; }
+            .code code:before {
+                content: counter(listing) "";
+                color: #AAAAAA;
+                display: inline-block;
+                min-width: 2em;
+                background-color: #F7F7F7;
+                border-right: 1px solid #DDDDDD;
+                text-align: right;
+                margin-right: 0.5em;
+               }
+            .error {border: 1px dashed red}
+        </style>
+
+
+        </span>
+    </head>
+    <body>
+
+    <span metal:fill-slot="content" tal:omit-tag="">
+    <span metal:define-macro="ajax" tal:omit-tag="">
+
+        <form action="/query" id='codeform'>
+            <input type='hidden' name='lastline' id='lastline'>
+            <input type='hidden' name='lastch' id='lastch'>
+            <textarea id="codeeditor" name="statement" cols="60" rows="5"
+                 tal:define="statement request.values.get('statement')"
+                 tal:content="statement and statement or default">#result = db.traverse().oN()
+        result = db.query('match (n)-[r*1..2]->(m) return n, "foo", r, m')</textarea><br>
+            <input type="submit">
+
+        </form>
+        <div>&nbsp;</div>
+        <div>
+            <b>Nodes</b>:
+
+            <ul>
+                <li tal:repeat="node result.nodes">
+                    ${node}
+                </li>
+            </ul>
+        </div>
+        <div>
+            <b>Edges:</b>
+
+            <ul>
+                <li tal:repeat="edge result.edges">
+                    ${edge}
+                </li>
+            </ul>
+        </div>
+        <div>
+     <div class="mermaid" tal:condition="result.nodes or result.edges">
+      graph TD
+         <span tal:omit-tag="" tal:repeat="node result.nodes">n${node.id[:6]}(${', '.join(list(node.labels))} <br/>${node.get("name",'no name')})</span>
+         <span tal:omit-tag="" tal:repeat="edge result.edges">n${edge.source.id[:6]}-- ${edge.reltype}-->n${edge.target.id[:6]}</span>
+
+      </div>
+
+        </div>
+        <div>
+            <b>Data:</b>
+
+            <table tal:condition="result.rows" border="1" style=" margin-left: 4em; width:50em">
+                <tr>
+                   <th tal:repeat="key result.rows[0].keys()" tal:content="key"></th>
+                </tr>
+
+                <tr tal:repeat="row result.rows">
+                    <td tal:repeat="key row.keys()" tal:content="row[key]"></td>
+                </tr>
+            </table>
+        </div>
+        <div>
+            Printed:
+            <pre style="margin-left: 4em">${printvalue}</pre>
+        </div>
+
+        <c tal:condition="request.values.get('lastline')"
+             tal:replace="structure string:<script>var lastline=${request.values.get('lastline',0)};var lastch=${request.values.get('lastch',0)};</script>" />
+        <script>
+            var codeeditor = document.getElementById("codeeditor");
+            var doc = CodeMirror.fromTextArea(codeeditor,{'mode':'python',
+                'autofocus':true,
+                'indentUnit':4,
+                'lineNumbers':1,});
+            doc.setCursor(parseInt(lastline) | 0 ,parseInt(lastch) | 0);
+
+            function storePos() {
+                pos = doc.getCursor();
+                document.getElementById('lastline').value=pos.line;
+                document.getElementById('lastch').value=pos.ch;
+
+            }
+            doc.addKeyMap({"Ctrl-Enter":function(cm) {
+                    storePos();
+                    document.forms['codeform'].submit();
+                }})
+
+            document.forms['codeform'].onsubmit=function(){
+                storePos();
+            }
+            mermaid.initialize({startOnLoad:true});
+        </script>
+    </span>
+</span>
+
+    </body>
+    </html>
+</c>

@@ -1,15 +1,17 @@
 """Database driver for neo4j"""
 from uuid import uuid4
 
-from neo4j import GraphDatabase
+from neo4j import GraphDatabase, BoltStatementResult
+import neo4j
 
-from paragraph.basic import GraphDB, Node, Edge
+from paragraph.basic import GraphDB, Node, Edge, ResultWrapper
 from paragraph.simpletraverser import SimpleTraverser
 
 
 # 00_todo: uses labels and types for filters
 
 
+# noinspection PyCallingNonCallable
 class NeoGraphDB:
 
     def __init__(self, uri='bolt://localhost:7687', username='', password='', encrypted=False, debug=0):
@@ -173,8 +175,9 @@ class NeoGraphDB:
         self.tx.rollback()
         self.tx = None
 
-    def query(self, query):
-        pass
+    def query(self, statement, **params):
+        result = self._run(statement,**params)
+        return Neo4jWrapper(result, self)
 
     def traverse(self, nodes=None, **filters):
         if nodes:
@@ -183,6 +186,40 @@ class NeoGraphDB:
         else:
             nodes = self.query_nodes(**filters)
         return SimpleTraverser(self, nodes)
+
+    def _recursive_replace(self,object):
+        objecttype = type(object)
+        if objecttype is neo4j.Node:
+            return self._neo2node(object)
+        elif objecttype is neo4j.Relationship or hasattr(object,'start_node'): # neo4j, I love you:
+            return self._neo2edge(object)
+        elif objecttype in [list,tuple]:
+            return [self._recursive_replace(o) for o in object]
+        elif hasattr(object, 'keys'):
+            return {k:self._recursive_replace(object[k]) for k in object.keys()}
+        # path
+        else:
+            return object
+
+
+class Neo4jWrapper(ResultWrapper):
+
+    def _prepare(self):
+        resulttype = type(self.result)
+        if resulttype in [BoltStatementResult]:
+            for r in self.result:
+                self.rows.append(self.db._recursive_replace(r))
+            graph = self.result.graph()
+            self.nodes = [self.db._recursive_replace(n) for n in graph.nodes]
+            self.edges = [self.db._recursive_replace(e) for e in graph.relationships]
+        elif resulttype in [SimpleTraverser] or isinstance(self.result, ResultWrapper):
+            self.nodes = self.result.nodes
+            self.edges = self.result.edges
+            self.rows = self.result.rows
+        else:
+            pass
+
+
 
 if __name__ == "__main__":
     db = NeoGraphDB()
