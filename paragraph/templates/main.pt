@@ -4,7 +4,9 @@
         <title metal:define-slot="title">main</title>
         <style>
             html, body {
-                height: 98vh
+                height: 98vh;
+                padding-left: 1em;
+                padding-top: 0.5em;
             }
         </style>
         <script src="/static/jquery-3.5.0.min.js"></script>

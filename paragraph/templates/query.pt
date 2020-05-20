@@ -6,12 +6,15 @@
         <span tal:omit-tag="" metal:fill-slot="headslot">
             <script src="/static/codemirror.js"></script>
             <link rel="stylesheet" href="/static/codemirror.css">
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.4.6/dist/css/uikit.min.css" />
             <script src="/static/python.js"></script>
-            <script src="/static/mermaid.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/mermaid@8.4.0/dist/mermaid.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/uikit@3.4.6/dist/js/uikit.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/uikit@3.4.6/dist/js/uikit-icons.min.js"></script>
 
             <style>
             .CodeMirror{border: 1px solid black;
-                        height: 7em;
+                        height: 10em;
                         width: 60em;
                         resize: vertical;
             }
@@ -51,52 +54,66 @@
             <input type="submit">
 
         </form>
-        <div>&nbsp;</div>
-        <div>
-            <b>Nodes</b>:
 
-            <ul>
-                <li tal:repeat="node result.nodes">
-                    ${node}
-                </li>
-            </ul>
+
+        <div>&nbsp</div>
+        <ul  class="uk-subnav" uk-tab>
+            <li><a href="#">Graph</a></li>
+            <li><a href="#">List</a></li>
+            <li><a href="#">Table</a></li>
+            <li><a href="#">Printed</a></li>
+        </ul>
+        <div  class="uk-switcher">
+            <div>
+                <div><b>Graph</b></div>
+                <div>&nbsp;</div>
+                 <div class="mermaid" tal:condition="result.nodes or result.edges">
+                  graph TD
+                     <span tal:omit-tag="" tal:repeat="node result.nodes">n${node.id[:6]}(${', '.join(list(node.labels))} <br/>${node.get("name",'no name')})</span>
+                     <span tal:omit-tag="" tal:repeat="edge result.edges">n${edge.source.id[:6]}-- ${edge.reltype}-->n${edge.target.id[:6]}</span>
+
+                  </div>
+            </div>
+            <div>
+                <div>
+                    <b>Nodes</b>
+
+                    <ul>
+                        <li tal:repeat="node result.nodes">
+                            ${node}
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <b>Edges</b>
+
+                    <ul>
+                        <li tal:repeat="edge result.edges">
+                            ${edge}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div>
+                <div><b>Data</b></div>
+                <div>&nbsp;</div>
+
+                <table tal:condition="result.rows" border="1" style="width:50em">
+                    <tr>
+                       <th tal:repeat="key result.rows[0].keys()" tal:content="key"></th>
+                    </tr>
+
+                    <tr tal:repeat="row result.rows">
+                        <td tal:repeat="key row.keys()" tal:content="row[key]"></td>
+                    </tr>
+                </table>
+            </div>
+            <div>
+                <div><b>Printed</b></div>
+                <pre style="">${printvalue}</pre>
+            </div>
         </div>
-        <div>
-            <b>Edges:</b>
-
-            <ul>
-                <li tal:repeat="edge result.edges">
-                    ${edge}
-                </li>
-            </ul>
-        </div>
-        <div>
-     <div class="mermaid" tal:condition="result.nodes or result.edges">
-      graph TD
-         <span tal:omit-tag="" tal:repeat="node result.nodes">n${node.id[:6]}(${', '.join(list(node.labels))} <br/>${node.get("name",'no name')})</span>
-         <span tal:omit-tag="" tal:repeat="edge result.edges">n${edge.source.id[:6]}-- ${edge.reltype}-->n${edge.target.id[:6]}</span>
-
-      </div>
-
-        </div>
-        <div>
-            <b>Data:</b>
-
-            <table tal:condition="result.rows" border="1" style=" margin-left: 4em; width:50em">
-                <tr>
-                   <th tal:repeat="key result.rows[0].keys()" tal:content="key"></th>
-                </tr>
-
-                <tr tal:repeat="row result.rows">
-                    <td tal:repeat="key row.keys()" tal:content="row[key]"></td>
-                </tr>
-            </table>
-        </div>
-        <div>
-            <b>Printed:</b>
-            <pre style="margin-left: 4em">${printvalue}</pre>
-        </div>
-
         <c tal:condition="request.values.get('lastline')"
              tal:replace="structure string:<script>var lastline=${request.values.get('lastline',0)};var lastch=${request.values.get('lastch',0)};</script>" />
         <script>
