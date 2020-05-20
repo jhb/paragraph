@@ -11,8 +11,10 @@
 
             <style>
             .CodeMirror{border: 1px solid black;
-                        height: 15em;
-                        width: 60em}
+                        height: 7em;
+                        width: 60em;
+                        resize: vertical;
+            }
             .code { counter-reset: listing;
                     border: 1px dashed grey;
                     padding: 2px;
@@ -91,7 +93,7 @@
             </table>
         </div>
         <div>
-            Printed:
+            <b>Printed:</b>
             <pre style="margin-left: 4em">${printvalue}</pre>
         </div>
 
