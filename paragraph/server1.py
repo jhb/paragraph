@@ -31,7 +31,7 @@ def query():
     if request.values:
         print(request.values.get('statement'))
         printed = StringIO()
-        vars = ObjectDict(printed=printed, db=db,result=None)
+        vars = ObjectDict(printed=printed, db=db,result=None, SimpleTraverser=SimpleTraverser)
         stdout = sys.stdout
         try:
             sys.stdout = printed
@@ -39,9 +39,17 @@ def query():
             result = vars.get('result', None)
             sys.stdout = stdout
             printvalue = printed.getvalue()
+            db.rollback()
         except Exception as e:
-            printvalue = printed.getvalue()
             sys.stdout=stdout
+            exinfo = sys.exc_info()
+            top = exinfo[2]
+            line = '?? - see below'
+            if top.tb_next:
+                top = exinfo[2].tb_next
+                line = top.tb_lineno
+            printvalue = printed.getvalue()
+            printvalue += """\n== Error on input line %s ==\n%s: %s\n""" %(line, e.__class__.__name__,str(e))
         finally:
             sys.stdout=stdout
     else:
