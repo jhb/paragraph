@@ -10,16 +10,24 @@
             <script src="/static/mermaid.min.js"></script>
 
             <style>
-            .CodeMirror{border: 1px solid black;
-                        height: 7em;
-                        width: 60em;
-                        resize: vertical;
+            .CodeMirror {
+                border: 1px solid black;
+                height: 10em;
+                width: 60em;
+                resize: vertical;
             }
-            .code { counter-reset: listing;
-                    border: 1px dashed grey;
-                    padding: 2px;
-                    width: 100%;}
-            code { counter-increment: listing; }
+
+            .code {
+                counter-reset: listing;
+                border: 1px dashed grey;
+                padding: 2px;
+                width: 100%;
+            }
+
+            code {
+                counter-increment: listing;
+            }
+
             .code code:before {
                 content: counter(listing) "";
                 color: #AAAAAA;
@@ -29,8 +37,11 @@
                 border-right: 1px solid #DDDDDD;
                 text-align: right;
                 margin-right: 0.5em;
-               }
-            .error {border: 1px dashed red}
+            }
+
+            .error {
+                border: 1px dashed red
+            }
         </style>
 
 
@@ -48,81 +59,108 @@
                  tal:define="statement request.values.get('statement')"
                  tal:content="statement and statement or default">#result = db.traverse().oN()
         result = db.query('match (n)-[r*1..2]->(m) return n, "foo", r, m')</textarea><br>
-            <input type="submit">
+            <input type="submit" value="run statement"> (ctrl+enter)
 
         </form>
-        <div>&nbsp;</div>
-        <div>
-            <b>Nodes</b>:
-
-            <ul>
-                <li tal:repeat="node result.nodes">
-                    ${node}
-                </li>
-            </ul>
-        </div>
-        <div>
-            <b>Edges:</b>
-
-            <ul>
-                <li tal:repeat="edge result.edges">
-                    ${edge}
-                </li>
-            </ul>
-        </div>
-        <div>
-     <div class="mermaid" tal:condition="result.nodes or result.edges">
-      graph TD
-         <span tal:omit-tag="" tal:repeat="node result.nodes">n${node.id[:6]}(${', '.join(list(node.labels))} <br/>${node.get("name",'no name')})</span>
-         <span tal:omit-tag="" tal:repeat="edge result.edges">n${edge.source.id[:6]}-- ${edge.reltype}-->n${edge.target.id[:6]}</span>
-
+                    <div>&nbsp;</div>
+        <nav>
+      <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <a class="nav-item nav-link active" id="nav-graph-tab" data-toggle="tab" href="#nav-graph"
+           role="tab" aria-controls="nav-graph" aria-selected="true">Graph</a>
+        <a class="nav-item nav-link" id="nav-list-tab" data-toggle="tab" href="#nav-list" role="tab"
+           aria-controls="nav-list" aria-selected="false">List</a>
+        <a class="nav-item nav-link" id="nav-table-tab" data-toggle="tab" href="#nav-table" role="tab"
+           aria-controls="nav-table" aria-selected="false">Table</a>
+        <a class="nav-item nav-link" id="nav-printed-tab" data-toggle="tab" href="#nav-printed"
+           role="tab" aria-controls="nav-printed" aria-selected="false">Printed</a>
       </div>
+    </nav>
 
+    <div class="tab-content" id="nav-tabContent">
+
+        <div class="tab-pane fade show active" id="nav-graph" role="tabpanel"
+             aria-labelledby="nav-graph-tab">
+             <div class="mermaid" tal:condition="result.nodes or result.edges">
+              graph TD
+                 <span tal:omit-tag="" tal:repeat="node result.nodes">n${node.id[:6]}(${', '.join(list(node.labels))} <br/>${node.get("name",'no name')})</span>
+                 <span tal:omit-tag="" tal:repeat="edge result.edges">n${edge.source.id[:6]}-- ${edge.reltype}-->n${edge.target.id[:6]}</span>
+
+              </div>
         </div>
-        <div>
-            <b>Data:</b>
+        <div class="tab-pane fade" id="nav-list" role="tabpanel"
+             aria-labelledby="nav-list-tab">
+                 <div>
+                    <b>Nodes</b>:
 
-            <table tal:condition="result.rows" border="1" style=" margin-left: 4em; width:50em">
-                <tr>
-                   <th tal:repeat="key result.rows[0].keys()" tal:content="key"></th>
-                </tr>
+                    <ul>
+                        <li tal:repeat="node result.nodes">
+                            ${node}
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <b>Edges:</b>
 
-                <tr tal:repeat="row result.rows">
-                    <td tal:repeat="key row.keys()" tal:content="row[key]"></td>
-                </tr>
-            </table>
+                    <ul>
+                        <li tal:repeat="edge result.edges">
+                            ${edge}
+                        </li>
+                    </ul>
+                </div>
         </div>
-        <div>
-            <b>Printed:</b>
-            <pre style="margin-left: 4em">${printvalue}</pre>
-        </div>
 
+        <div class="tab-pane fade" id="nav-table" role="tabpanel"
+             aria-labelledby="nav-table-tab">
+                <b>Data:</b>
+
+                <table tal:condition="result.rows" border="1" style="width:50em">
+                    <tr>
+                       <th tal:repeat="key result.rows[0].keys()" tal:content="key"></th>
+                    </tr>
+
+                    <tr tal:repeat="row result.rows">
+                        <td tal:repeat="key row.keys()" tal:content="row[key]"></td>
+                    </tr>
+                </table>
+        </div>
+        <div class="tab-pane fade" id="nav-printed" role="tabpanel"
+             aria-labelledby="nav-printed-tab">
+                <b>Printed:</b>
+                <pre>${printvalue}</pre>
+        </div>
+    </div>
         <c tal:condition="request.values.get('lastline')"
              tal:replace="structure string:<script>var lastline=${request.values.get('lastline',0)};var lastch=${request.values.get('lastch',0)};</script>" />
         <script>
             var codeeditor = document.getElementById("codeeditor");
-            var doc = CodeMirror.fromTextArea(codeeditor,{'mode':'python',
-                'autofocus':true,
-                'indentUnit':4,
-                'lineNumbers':1,});
-            doc.setCursor(parseInt(lastline) | 0 ,parseInt(lastch) | 0);
+            var doc = CodeMirror.fromTextArea(codeeditor, {
+                'mode': 'python',
+                'autofocus': true,
+                'indentUnit': 4,
+                'lineNumbers': 1,
+            });
+            doc.setCursor(parseInt(lastline) | 0, parseInt(lastch) | 0);
 
             function storePos() {
                 pos = doc.getCursor();
-                document.getElementById('lastline').value=pos.line;
-                document.getElementById('lastch').value=pos.ch;
+                document.getElementById('lastline').value = pos.line;
+                document.getElementById('lastch').value = pos.ch;
 
             }
-            doc.addKeyMap({"Ctrl-Enter":function(cm) {
+
+            doc.addKeyMap({
+                "Ctrl-Enter": function (cm) {
                     storePos();
                     document.forms['codeform'].submit();
-                }})
+                }
+            })
 
-            document.forms['codeform'].onsubmit=function(){
+            document.forms['codeform'].onsubmit = function () {
                 storePos();
             }
-            mermaid.initialize({startOnLoad:true});
+            mermaid.initialize({startOnLoad: true});
         </script>
+
     </span>
 </span>
 
