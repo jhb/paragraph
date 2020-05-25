@@ -62,6 +62,9 @@ class ObjectDict(dict):
                   lambda self, v: self._set('_id',v),
                   lambda self: self._del('_id'))
 
+    def props(self):
+        return '<br>'.join([f'{k} {v}' for k,v in sorted(self.items())])
+
 
 class Node(ObjectDict):
 
@@ -140,6 +143,8 @@ class ResultWrapper:
         self.rows = [] # should be filled / overwritten
         self.nodes = []
         self.edges = []
+        self._graphnodes = set()
+        self._graphedges = set()
         self._prepare()
 
     def _prepare(self):
@@ -153,6 +158,8 @@ class ResultWrapper:
         else:
             self.rows = [dict(value=self.result)]
 
+    def graphdata(self):
+        return (self._graphnodes, self._graphedges)
 
 # Interfaces
 
