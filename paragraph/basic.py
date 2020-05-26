@@ -95,8 +95,8 @@ class Node(ObjectDict):
 
 
     def __repr__(self):
-        return "<Node(i='%s','%s') %s>" % (self.id[:6],
-                                        ','.join(sorted(list(self.labels))),
+        return "<Node(i='%s', '%s') %s>" % (self.id[:6],
+                                        ', '.join(sorted(list(self.labels))),
                                         ', '.join('%s=%s' % i for i in self.items() if i[0] != '_id'))
 
 class Edge(ObjectDict):
