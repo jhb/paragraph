@@ -59,7 +59,7 @@
     <tr valign="top">
         <td>
             <h2>Query</h2>
-            <form action="/query" id='codeform'>
+            <form action="/query" id='codeform' class="uk-form">
                 <input type='hidden' name='lastline' id='lastline'>
                 <input type='hidden' name='lastch' id='lastch'>
                 <textarea id="codeeditor" name="statement" cols="60" rows="5"
@@ -71,7 +71,7 @@ for row in result.rows:
 print('\nnow continue working with the result')
 print(result.rows[0]['n'].oN().nodes)
     </textarea><br>
-                <input type="submit">
+                <input type="submit" class="uk-button uk-button-primary" value="run (ctrl+enter)"></input>
 
             </form>
 
