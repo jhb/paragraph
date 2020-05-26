@@ -1,0 +1,52 @@
+<html tal:omit-tag="">
+<body tal:omit-tag="">
+    <h2>Node ${node.id[:6]}</h2>
+    <form class="uk-form-horizontal">
+
+        <div>
+            <label for="_id" class="uk-form-label">id</label>
+            <div class="uk-form-controls"><input id="_id" disabled value="${node.id}" class="uk-input"></div>
+        </div>
+        <div>&nbsp;</div>
+
+        <div><label for="labels" class="uk-form-label" title="Comma seperated labels">labels</label>
+
+            <div class="uk-form-controls"><input name="labels" id="labels" value="${', '.join(node.labels)}"
+                      class="uk-input uk-form-blankx"/></div>
+        </div>
+
+        <div tal:repeat="(key,value) [(k,v) for k,v in node.items() if k!='_id']">
+            <label for="${key}" class="uk-form-label">${key}</label>
+            <div class="uk-form-controls"><input name="${key}" id="${key}" value="${value}" class="uk-input uk-form-blankx"></div>
+        </div>
+        <div>&nbsp;</div>
+        <div>&nbsp;</div>
+        <hr>
+        <div>
+            New Property<br/>
+            <label for="_newprop_name" class="uk-form-label">name</label>
+            <div class="uk-form-controls"><input name="_newprop_name" id="_newprop_name" value="" class="uk-input"></div>
+        </div>
+
+        <div>
+            <label for="_newprop_value" class="uk-form-label">value</label>
+            <div class="uk-form-controls"><input name="_newprop_value" id="_newprop_value" value="" class="uk-input"></div>
+        </div>
+
+        <div>
+            <label for="_newprop_type" class="uk-form-label">type</label>
+            <div class="uk-form-controls"><select name="_newprop_type" id="_newprop_type" class="uk-select">
+                <option value=""></option>
+                <option value="string">string</option>
+                <option value="int">integer</option>
+            </select></div>
+        </div>
+        <div>&nbsp;</div>
+        <div>
+<!--?            <input type="submit" value="save" class="uk-input">Save</input>-->
+            <button class="uk-button uk-button-default">Save</button>
+        </div>
+    </form>
+
+</body>
+</html>

@@ -219,6 +219,8 @@ class Neo4jWrapper(ResultWrapper):
         self.nodes = [self.db._recursive_replace(n) for n in graph.nodes]
         self.edges = [self.db._recursive_replace(e) for e in graph.relationships]
 
+    def allnodes(self):
+        return self
 
 if __name__ == "__main__":
     db = NeoGraphDB()
