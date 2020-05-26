@@ -16,7 +16,7 @@
             <style>
                 .CodeMirror{border: 1px solid black;
                             height: 10em;
-                            width: 60em;
+                            width: 50em;
                             resize: vertical;
                 }
                 .code { counter-reset: listing;
