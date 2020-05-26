@@ -69,22 +69,13 @@ print(result.rows[0]['n'].oN().nodes)
 
         <div>&nbsp</div>
         <ul  class="uk-subnav" uk-tab>
-            <li><a href="#">Graph</a></li>
             <li><a href="#">List</a></li>
+            <li><a href="#">Graph</a></li>
             <li><a href="#">Table</a></li>
             <li><a href="#">Printed</a></li>
         </ul>
         <div  class="uk-switcher">
-            <div>
-                <div><b>Graph</b></div>
-                <div>&nbsp;</div>
-                 <div class="mermaid" tal:condition="result.nodes or result.edges">
-                  graph TD
-                     <span tal:omit-tag="" tal:repeat="node result.nodes">n${node.id[:6]}(${', '.join(list(node.labels))} <br/>${node.get("name",'no name')})</span>
-                     <span tal:omit-tag="" tal:repeat="edge result.edges">n${edge.source.id[:6]}-- ${edge.reltype}-->n${edge.target.id[:6]}</span>
 
-                  </div>
-            </div>
             <div>
                 <div>
                     <b>Nodes</b>
@@ -105,6 +96,18 @@ print(result.rows[0]['n'].oN().nodes)
                     </ul>
                 </div>
             </div>
+
+             <div onshow="mermaid.init(undefined,'.mermaid')">
+                <div><b>Graph</b></div>
+                <div>&nbsp;</div>
+                 <div class="mermaid" tal:condition="result.nodes or result.edges">
+                  graph TD
+                     <span tal:omit-tag="" tal:repeat="node result.nodes">n${node.id[:6]}(${', '.join(list(node.labels))} <br/>${node.get("name",'no name')})</span>
+                     <span tal:omit-tag="" tal:repeat="edge result.edges">n${edge.source.id[:6]}-- ${edge.reltype}-->n${edge.target.id[:6]}</span>
+
+                  </div>
+            </div>
+
 
             <div class="uk-overflow-auto">
                 <div><b>Data</b></div>
@@ -152,7 +155,7 @@ print(result.rows[0]['n'].oN().nodes)
             document.forms['codeform'].onsubmit=function(){
                 storePos();
             }
-            mermaid.initialize({startOnLoad:true});
+            mermaid.initialize({startOnLoad:false});
         </script>
     </span>
 </span>
