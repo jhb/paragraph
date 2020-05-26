@@ -14,28 +14,39 @@
             <script src="https://cdn.jsdelivr.net/npm/uikit@3.4.6/dist/js/uikit-icons.min.js"></script>
 
             <style>
-            .CodeMirror{border: 1px solid black;
-                        height: 10em;
-                        width: 60em;
-                        resize: vertical;
-            }
-            .code { counter-reset: listing;
-                    border: 1px dashed grey;
-                    padding: 2px;
-                    width: 100%;}
-            code { counter-increment: listing; }
-            .code code:before {
-                content: counter(listing) "";
-                color: #AAAAAA;
-                display: inline-block;
-                min-width: 2em;
-                background-color: #F7F7F7;
-                border-right: 1px solid #DDDDDD;
-                text-align: right;
-                margin-right: 0.5em;
-               }
-            .error {border: 1px dashed red}
-        </style>
+                .CodeMirror{border: 1px solid black;
+                            height: 10em;
+                            width: 50em;
+                            resize: vertical;
+                }
+                .code { counter-reset: listing;
+                        border: 1px dashed grey;
+                        padding: 2px;
+                        width: 100%;}
+                code { counter-increment: listing; }
+                .code code:before {
+                    content: counter(listing) "";
+                    color: #AAAAAA;
+                    display: inline-block;
+                    min-width: 2em;
+                    background-color: #F7F7F7;
+                    border-right: 1px solid #DDDDDD;
+                    text-align: right;
+                    margin-right: 0.5em;
+                   }
+                .error {border: 1px dashed red}
+
+                .uk-tooltip {
+                    word-wrap: break-word;
+                    max-width:100%;
+                }
+
+                .basetable td,tr {
+                    padding: 15px;
+                }
+
+
+            </style>
 
 
         </span>
@@ -44,111 +55,157 @@
 
     <span metal:fill-slot="content" tal:omit-tag="">
     <span metal:define-macro="ajax" tal:omit-tag="">
-
-        <form action="/query" id='codeform'>
-            <input type='hidden' name='lastline' id='lastline'>
-            <input type='hidden' name='lastch' id='lastch'>
-            <textarea id="codeeditor" name="statement" cols="60" rows="5"
-                 tal:define="statement request.values.get('statement')"
-                 tal:content="statement and statement or default">#result = db.traverse().oN()
+<table border="0" class="basetable">
+    <tr valign="top">
+        <td>
+            <h2>Query</h2>
+            <form action="/query" id='codeform'>
+                <input type='hidden' name='lastline' id='lastline'>
+                <input type='hidden' name='lastch' id='lastch'>
+                <textarea id="codeeditor" name="statement" cols="60" rows="5"
+                     tal:define="statement request.values.get('statement')"
+                     tal:content="statement and statement or default">#result = db.traverse().oN()
 result = db.query('match (n)-[r*1..2]->(m) return n, "foo", r, m')
 for row in result.rows:
     print(row['n'].get('name','no name'))
 print('\nnow continue working with the result')
 print(result.rows[0]['n'].oN().nodes)
-</textarea><br>
-            <input type="submit">
+    </textarea><br>
+                <input type="submit">
 
-        </form>
+            </form>
 
+            <span tal:condition="0">
+                <span metal:define-macro="nodelink">
+                    <a href="/show_node/${node.id}" onclick="show_detail($(this).attr('href')); return false;" onmouseover="show_detail($(this).attr('href'))">${node}</a>
+                </span>
+                <span metal:define-macro="edgelink">
+                    <a href="/show_edge/${edge.id}" onclick="show_detail($(this).attr('href')); return false;" onmouseover="show_detail($(this).attr('href'))">${edge}</a>
+                </span>
+            </span>
 
-        <div>&nbsp</div>
-        <ul  class="uk-subnav" uk-tab>
-            <li><a href="#">Graph</a></li>
-            <li><a href="#">List</a></li>
-            <li><a href="#">Table</a></li>
-            <li><a href="#">Printed</a></li>
-        </ul>
-        <div  class="uk-switcher">
-            <div>
-                <div><b>Graph</b></div>
-                <div>&nbsp;</div>
-                 <div class="mermaid" tal:condition="result.nodes or result.edges">
-                  graph TD
-                     <span tal:omit-tag="" tal:repeat="node result.allnodes().nodes">n${node.id[:6]}(${', '.join(list(node.labels))} <br/>${node.get("name",'no name')})</span>
-                     <span tal:omit-tag="" tal:repeat="edge result.edges">n${edge.source.id[:6]}-- ${edge.reltype}-->n${edge.target.id[:6]}</span>
+            <div>&nbsp</div>
+            <ul class="uk-subnav" uk-tab>
+                <li><a href="#">List</a></li>
+                <li><a href="#">Graph</a></li>
+                <li><a href="#">Table</a></li>
+                <li><a href="#">Printed</a></li>
+            </ul>
+            <div class="uk-switcher">
 
-                  </div>
-            </div>
-            <div>
                 <div>
-                    <b>Nodes</b>
+                    <div>
+                        <b>Nodes</b>
 
-                    <ul>
-                        <li tal:repeat="node result.nodes">
-                            ${node}
-                        </li>
-                    </ul>
+                        <ul class="uk-list uk-list-bullet">
+                            <li tal:repeat="node result.nodes">
+                                <span metal:use-macro="macros.nodelink"></span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <b>Edges</b>
+
+                        <ul class="uk-list uk-list-bullet">
+                            <li tal:repeat="edge result.edges">
+                                 <span metal:use-macro="macros.edgelink"></span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
+
+                 <div onshow="mermaid.init({securityLevel:'loose'},'.mermaid')">
+                    <div><b>Graph</b></div>
+                    <div>&nbsp;</div>
+                     <div class="mermaid" tal:condition="result.nodes or result.edges">
+                      graph TD
+                         <span tal:omit-tag="" tal:repeat="node result.allnodes().nodes">n${node.id}(${', '.join(list(node.labels))} <br/>${node.get("name",'no name')})</span>
+                         <span tal:omit-tag="" tal:repeat="edge result.edges">n${edge.source.id}-- ${edge.reltype}-->n${edge.target.id}</span>
+                         <span tal:omit-tag="" tal:repeat="node result.allnodes().nodes">click n${node.id} node_callback</span>
+                      </div>
+                </div>
+
+
+                <div class="uk-overflow-auto">
+                    <div><b>Data</b></div>
+                    <div>&nbsp;</div>
+
+                    <table tal:condition="result.rows" xborder="1"
+                                                       class="uk-table uk-table-striped uk-table-hover uk-table-responsive"
+                                                       style="width:50em">
+                        <thead>
+                            <tr>
+                               <th tal:repeat="key result.rows[0].keys()" tal:content="key"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr tal:repeat="row result.rows">
+                                <td tal:repeat="key row.keys()" tal:content="row[key]"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
                 <div>
-                    <b>Edges</b>
-
-                    <ul>
-                        <li tal:repeat="edge result.edges">
-                            ${edge}
-                        </li>
-                    </ul>
+                    <div><b>Printed</b></div>
+                    <pre style="">${printvalue}</pre>
                 </div>
             </div>
+        </td>
+        <td style="border-left: 0.5px solid darkgrey;">
+        <div id="action"></div>
 
-            <div>
-                <div><b>Data</b></div>
-                <div>&nbsp;</div>
 
-                <table tal:condition="result.rows" border="1" style="width:50em">
-                    <tr>
-                       <th tal:repeat="key result.rows[0].keys()" tal:content="key"></th>
-                    </tr>
-
-                    <tr tal:repeat="row result.rows">
-                        <td tal:repeat="key row.keys()" tal:content="row[key]"></td>
-                    </tr>
-                </table>
-            </div>
-            <div>
-                <div><b>Printed</b></div>
-                <pre style="">${printvalue}</pre>
-            </div>
-        </div>
-        <c tal:condition="request.values.get('lastline')"
+        </td>
+    </tr>
+</table>
+  <c tal:condition="request.values.get('lastline')"
              tal:replace="structure string:<script>var lastline=${request.values.get('lastline',0)};var lastch=${request.values.get('lastch',0)};</script>" />
         <script>
             var codeeditor = document.getElementById("codeeditor");
-            var doc = CodeMirror.fromTextArea(codeeditor,{'mode':'python',
-                'autofocus':true,
-                'indentUnit':4,
-                'lineNumbers':1,});
-            doc.setCursor(parseInt(lastline) | 0 ,parseInt(lastch) | 0);
+            var doc = CodeMirror.fromTextArea(codeeditor, {
+                'mode': 'python',
+                'autofocus': true,
+                'indentUnit': 4,
+                'lineNumbers': 1,
+            });
+            doc.setCursor(parseInt(lastline) | 0, parseInt(lastch) | 0);
 
             function storePos() {
                 pos = doc.getCursor();
-                document.getElementById('lastline').value=pos.line;
-                document.getElementById('lastch').value=pos.ch;
+                document.getElementById('lastline').value = pos.line;
+                document.getElementById('lastch').value = pos.ch;
 
             }
-            doc.addKeyMap({"Ctrl-Enter":function(cm) {
+
+            doc.addKeyMap({
+                "Ctrl-Enter": function (cm) {
                     storePos();
                     document.forms['codeform'].submit();
-                }})
+                }
+            })
 
-            document.forms['codeform'].onsubmit=function(){
+            document.forms['codeform'].onsubmit = function () {
                 storePos();
             }
-            mermaid.initialize({startOnLoad:true});
-        </script>
-    </span>
-</span>
+            mermaid.initialize({startOnLoad: false,securityLevel:'loose'});
 
+            function show_detail(path){
+                $.get(path, function (data) {
+                    $('#action').html(data);
+                })
+            }
+
+            var node_callback = function(idstring) {
+                var node_id = idstring.substr(1);
+                var path = '/show_node/'+node_id;
+                show_detail(path);
+
+            }
+
+        </script>
+            </span>
+</span>
     </body>
     </html>
 </c>

@@ -1,6 +1,7 @@
 """Database driver for neo4j"""
 from uuid import uuid4
 
+
 from neo4j import GraphDatabase, BoltStatementResult
 import neo4j
 
@@ -27,6 +28,7 @@ class NeoGraphDB:
         self.session = self.driver.session()
         self.tx = None
         self.debug = debug
+        self._cache = {}
 
     def begin(self):
         """Begin a transaction
@@ -46,19 +48,25 @@ class NeoGraphDB:
         return tx.run(statement, **kwargs)
 
     def _neo2node(self, neonode):
-        node = Node(self)
-        node.update(neonode)
-        node.labels.update(neonode.labels)
-        return node
+        nodeid = neonode['_id']
+        if nodeid not in self._cache:
+            node = Node(self)
+            node.update(neonode)
+            node.labels.update(neonode.labels)
+            self._cache[nodeid] = node
+        return self._cache[nodeid]
+
 
     def _neo2edge(self, relation):
-
-        edge = Edge(db = self,
-                    source=self._neo2node(relation.start_node),
-                    reltype=relation.type,
-                    target=self._neo2node(relation.end_node))
-        edge.update(relation.items())
-        return edge
+        edgeid = relation['_id']
+        if edgeid not in self._cache:
+            edge = Edge(db = self,
+                        source=self._neo2node(relation.start_node),
+                        reltype=relation.type,
+                        target=self._neo2node(relation.end_node))
+            edge.update(relation.items())
+            self._cache[edgeid] = edge
+        return self._cache[edgeid]
 
     def _nodeid(self, nodeid):
         if type(nodeid) is Node:

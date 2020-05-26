@@ -1,0 +1,15 @@
+<html tal:omit-tag="">
+<body tal:omit-tag="">
+    <h2>Node ${node.id[:6]}</h2>
+    <i>${', '.join(node.labels)}</i>
+    <dl>
+        <dt>id</dt>
+        <dd>${node.id}</dd>
+        <span tal:omit-tag=""
+             tal:repeat="(key,value) [(k,v) for k,v in node.items() if k!='_id']">
+            <dt>${key}</dt>
+            <dd>${value}</dd>
+        </span>
+    </dl>
+</body>
+</html>

@@ -113,8 +113,6 @@ def test_json_to_edge(ld):
     edge.from_json(js)
     assert edge == ld.e1
 
-
-
 def test_edge_source_property(ld):
     e1 = ld.e1
     assert e1.source == ld.alice
@@ -128,4 +126,8 @@ def test_query(db):
     r = db.query('match (n) return count(n) as c')
     assert r.rows[0]['c']==0
 
+def test_same_objects(db, ld):
+    a1 = db.query_nodes(name='alice')[0]
+    a2 = db.query_nodes(name='alice')[0]
+    assert id(a1) == id(a2)
 
