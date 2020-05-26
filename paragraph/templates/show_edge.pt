@@ -1,0 +1,19 @@
+<html tal:omit-tag="">
+<body tal:omit-tag="">
+    <h2>Edge ${edge.id[:6]}</h2>
+    <i>${edge.reltype}</i>
+    <dl>
+        <dt>id</dt>
+        <dd>${edge.id}</dd>
+        <dt>source</dt>
+        <dd>${edge.source}</dd>
+        <dt>target</dt>
+        <dd>${edge.target}</dd>
+        <span tal:omit-tag=""
+             tal:repeat="(key,value) [(k,v) for k,v in edge.items() if k!='_id']">
+            <dt>${key}</dt>
+            <dd>${value}</dd>
+        </span>
+    </dl>
+</body>
+</html>

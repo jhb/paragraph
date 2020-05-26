@@ -55,6 +55,7 @@ class SimpleTraverser(ResultWrapper):
 
             thisround=nextround
             nextround=set()
+
         return SimpleTraverser(self.g, nodes=found, prev=self)
 
     def allnodes(self):

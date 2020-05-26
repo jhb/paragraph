@@ -58,6 +58,17 @@ def query():
         result = ResultWrapper(result)
     return templates.query(db=db,result=result, printvalue=printvalue)
 
+@app.route('/show_node/<string:node_id>')
+def show_node(node_id):
+    result = db.query_nodes(_id=node_id)
+    return templates.show_node(db=db,node=result[0])
+
+@app.route('/show_edge/<string:edge_id>')
+def show_edge(edge_id):
+    result = db.query_edges(_id=edge_id)
+    return templates.show_edge(db=db,edge=result[0])
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
