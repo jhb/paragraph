@@ -12,6 +12,9 @@
             <script src="https://cdn.jsdelivr.net/npm/mermaid@8.4.0/dist/mermaid.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/uikit@3.4.6/dist/js/uikit.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/uikit@3.4.6/dist/js/uikit-icons.min.js"></script>
+             <script src="//unpkg.com/three"></script>
+            <script src="//unpkg.com/three-spritetext"></script>
+            <script src="//unpkg.com/3d-force-graph"></script>
 
             <style>
                 .CodeMirror{border: 1px solid black;
@@ -99,6 +102,7 @@ print(result.rows[0]['n'].oN().nodes)
             <ul class="uk-subnav" uk-tab>
                 <li><a href="#">List</a></li>
                 <li><a href="#">Graph</a></li>
+                <li><a href="#">3D</a></li>
                 <li><a href="#">Table</a></li>
                 <li><a href="#">Printed</a></li>
             </ul>
@@ -135,6 +139,13 @@ print(result.rows[0]['n'].oN().nodes)
                          <span tal:omit-tag="" tal:repeat="node result.allnodes().nodes">click n${node.id} node_callback</span>
                       </div>
                 </div>
+                <div onshow="start_3d()">
+                    <span id="3d-graph-data" style="display:none">
+                        ${result.graphjson()}
+                    </span>
+                    <div id="3d-graph">3d</div>
+
+                </div>
 
 
                 <div class="uk-overflow-auto">
@@ -168,6 +179,7 @@ print(result.rows[0]['n'].oN().nodes)
         </td>
     </tr>
 </table>
+<div id="samplediv" style="height:0;width:0;outline:none;border:none;padding:none;margin:none;box-sizing:content-box;"></div>
   <c tal:condition="request.values.get('lastline')"
              tal:replace="structure string:<script>var lastline=${request.values.get('lastline',0)};var lastch=${request.values.get('lastch',0)};</script>" />
         <script>
@@ -211,6 +223,72 @@ print(result.rows[0]['n'].oN().nodes)
                 var path = '/edit_node/'+node_id;
                 show_detail(path);
 
+            }
+
+            var div = document.getElementById('samplediv');
+            div.style.height = '1em';
+            var em = div.offsetHeight;
+
+
+            var start_3d = function() {
+                var myGraph = ForceGraph3D({ controlType: 'orbit' });
+                var canvas = document.getElementById('3d-graph');
+                var data = JSON.parse($('#3d-graph-data').text());
+
+                console.log(data);
+                mg = myGraph(canvas);
+                console.log(em);
+                mg.height(40*em);
+                mg.width(40*em);
+                mg.cooldownTicks(100);
+                mg.backgroundColor('#FFFFFF')
+
+                mg.graphData(data);
+                mg.nodeAutoColorBy('name');
+                mg.nodeThreeObject(node => {
+                  // use a sphere as a drag handle
+                  const obj = new THREE.Mesh(
+                    new THREE.SphereGeometry(10),
+                    new THREE.MeshBasicMaterial({ depthWrite: false, transparent: true, opacity: 0 })
+                  );
+
+                  // add text sprite as child
+                  const sprite = new SpriteText(node.name);
+                  sprite.color = node.color;
+                  sprite.textHeight = 6;
+                  obj.add(sprite);
+
+                  return obj;
+                });
+                mg.linkThreeObjectExtend(true);
+                mg.linkThreeObject(link => {
+                  // extend link with text sprite
+                  const sprite = new SpriteText(`$$${link.reltype}`);
+                  sprite.color = 'darkgrey';
+                  sprite.textHeight = 3.5;
+                  return sprite;
+                })
+                .linkPositionUpdate((sprite, { start, end }) => {
+                  const middlePos = Object.assign(...['x', 'y', 'z'].map(c => ({
+                    [c]: start[c] + (end[c] - start[c]) / 2 // calc middle point
+                  })));
+
+                  // Position sprite
+                  Object.assign(sprite.position, middlePos);
+                });
+                //mg.linkDirectionalParticles(5);
+                mg.d3Force('charge').strength(-120);
+                mg
+                    //.linkWidth(1)
+                    .linkCurvature(0)
+                    .linkDirectionalArrowLength(3.5)
+                    .linkDirectionalArrowRelPos(1)
+                    .linkDirectionalArrowColor(function(link){return "lightgrey"})
+                    .linkColor(function(link){return "darkgrey"})
+                    //.linkAutoColorBy('reltype')
+                    .linkOpacity(0.3)
+                ;
+                mg.onEngineStop(() => mg.zoomToFit(400));
             }
 
         </script>

@@ -168,6 +168,12 @@ class ResultWrapper:
     def graphdata(self):
         return (self._graphnodes, self._graphedges)
 
+    def graphjson(self):
+        out = {}
+        out['nodes'] = [dict(id=node.id,name=node.dn()) for node in self.nodes]
+        out['links'] = [dict(source=edge.source.id,target=edge.target.id,reltype=edge.reltype) for edge in self.edges]
+        return json.dumps(out,indent=2)
+
 # Interfaces
 
 class Traversal:
