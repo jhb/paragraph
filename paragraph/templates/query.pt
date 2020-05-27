@@ -139,7 +139,7 @@ print(result.rows[0]['n'].oN().nodes)
                          <span tal:omit-tag="" tal:repeat="node result.allnodes().nodes">click n${node.id} node_callback</span>
                       </div>
                 </div>
-                <div onshow="start_3d()">
+                <div xonshow="start_3d()">
                     <span id="3d-graph-data" style="display:none">
                         ${result.graphjson()}
                     </span>
@@ -225,6 +225,11 @@ print(result.rows[0]['n'].oN().nodes)
 
             }
 
+            var node_3d_callback = function (node,event) {
+                var path = '/edit_node/'+node.id;
+                show_detail(path);
+            }
+
             var div = document.getElementById('samplediv');
             div.style.height = '1em';
             var em = div.offsetHeight;
@@ -239,7 +244,7 @@ print(result.rows[0]['n'].oN().nodes)
                 mg = myGraph(canvas);
                 console.log(em);
                 mg.height(40*em);
-                mg.width(40*em);
+                mg.width(50*em);
                 mg.cooldownTicks(100);
                 mg.backgroundColor('#FFFFFF')
 
@@ -260,6 +265,8 @@ print(result.rows[0]['n'].oN().nodes)
 
                   return obj;
                 });
+                mg.onNodeClick(node_3d_callback);
+                mg.onNodeHover(function(){});
                 mg.linkThreeObjectExtend(true);
                 mg.linkThreeObject(link => {
                   // extend link with text sprite
@@ -290,7 +297,7 @@ print(result.rows[0]['n'].oN().nodes)
                 ;
                 mg.onEngineStop(() => mg.zoomToFit(400));
             }
-
+            start_3d();
         </script>
             </span>
 </span>
