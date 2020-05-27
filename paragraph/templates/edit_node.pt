@@ -44,7 +44,7 @@
         <div>&nbsp;</div>
         <div>
 <!--?            <input type="submit" value="save" class="uk-input">Save</input>-->
-            <button class="uk-button uk-button-secondary">Save</button>
+            <button class="uk-button uk-button-primary">Save</button>
         </div>
     </form>
 

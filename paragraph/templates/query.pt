@@ -77,10 +77,21 @@ print(result.rows[0]['n'].oN().nodes)
 
             <span tal:condition="0">
                 <span metal:define-macro="nodelink">
-                    <a href="/show_node/${node.id}" onclick="show_detail('/edit_node/${node.id}'); return false;" onmouseover="show_detail('/edit_node/${node.id}')">${node}</a>
+                    <a href="/show_node/${node.id}" onclick="show_detail('/edit_node/${node.id}'); return false;"
+                       xonmouseover="show_detail('/edit_node/${node.id}')"
+                       title="Node ${node.id}">
+
+                        (${list(node.labels)[0]} ${node.dn()})</a>
                 </span>
                 <span metal:define-macro="edgelink">
-                    <a href="/show_edge/${edge.id}" onclick="show_detail($(this).attr('href')); return false;" onmouseover="show_detail($(this).attr('href'))">${edge}</a>
+                    <span tal:define="node edge.source" metal:use-macro="macros.nodelink" tal:omit-tag="">nodeA</span>
+                    <a  href="/show_edge/${edge.id}" onclick="show_detail($(this).attr('href')); return false;"
+                        onmouseover="show_detail($(this).attr('href'))"
+                        title="Edge ${edge.id}">
+                        --[${edge.reltype}] -->
+                    </a>
+                    <span tal:define="node edge.target" metal:use-macro="macros.nodelink" tal:omit-tag="">nodeB</span>
+
                 </span>
             </span>
 
@@ -194,6 +205,7 @@ print(result.rows[0]['n'].oN().nodes)
                 })
             }
 
+            // for mermaid
             var node_callback = function(idstring) {
                 var node_id = idstring.substr(1);
                 var path = '/edit_node/'+node_id;
