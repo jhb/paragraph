@@ -95,9 +95,16 @@ class Node(ObjectDict):
 
 
     def __repr__(self):
-        return "<Node(i='%s','%s') %s>" % (self.id[:6],
-                                        ','.join(sorted(list(self.labels))),
+        return "<Node(i='%s', '%s') %s>" % (self.id[:6],
+                                        ',  '.join(sorted(list(self.labels))),
                                         ', '.join('%s=%s' % i for i in self.items() if i[0] != '_id'))
+
+    def dn(self):
+        for k in ['_dn','name','id']:
+            if k in self:
+                return self[k]
+        return self.id[:6]
+
 
 class Edge(ObjectDict):
     def __init__(self, db, source=None, reltype=None, target=None, **props):
@@ -160,6 +167,12 @@ class ResultWrapper:
 
     def graphdata(self):
         return (self._graphnodes, self._graphedges)
+
+    def graphjson(self):
+        out = {}
+        out['nodes'] = [dict(id=node.id,name=node.dn()) for node in self.nodes]
+        out['links'] = [dict(source=edge.source.id,target=edge.target.id,reltype=edge.reltype) for edge in self.edges]
+        return json.dumps(out,indent=2)
 
 # Interfaces
 

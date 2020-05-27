@@ -63,6 +63,12 @@ def show_node(node_id):
     result = db.query_nodes(_id=node_id)
     return templates.show_node(db=db,node=result[0])
 
+@app.route('/edit_node/<string:node_id>')
+def edit_node(node_id):
+    result = db.query_nodes(_id=node_id)
+    return templates.edit_node(db=db,node=result[0])
+
+
 @app.route('/show_edge/<string:edge_id>')
 def show_edge(edge_id):
     result = db.query_edges(_id=edge_id)

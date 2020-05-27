@@ -1,6 +1,6 @@
 <html tal:omit-tag="">
 <body tal:omit-tag="">
-    <h2>Node ${node.id[:6]}</h2>
+    <h2>View node ${node.id[:6]}</h2>
     <i>${', '.join(node.labels)}</i>
     <dl>
         <dt>id</dt>
@@ -11,5 +11,7 @@
             <dd>${value}</dd>
         </span>
     </dl>
+<!--?    <a class="uk-button uk-button-default" href="/edit_node/${node.id}"-->
+<!--?        onclick="edit_detail($(this).attr('href')); return false;">Edit</a>-->
 </body>
 </html>
