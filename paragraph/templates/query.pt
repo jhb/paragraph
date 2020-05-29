@@ -19,7 +19,7 @@
             <style>
                 .CodeMirror{border: 1px solid black;
                             height: 10em;
-                            width: 50em;
+                            width: 50vw;
                             resize: vertical;
                 }
                 .code { counter-reset: listing;
@@ -46,6 +46,16 @@
 
                 .basetable td,tr {
                     padding: 15px;
+                }
+
+                .spacer {
+                    width: 2em;
+                    display: inline-block;
+                }
+
+                .delete-checkbox {
+                    width: 2em;
+                    display: inline-block;
                 }
 
 
@@ -84,7 +94,7 @@ print(result.rows[0]['n'].oN().nodes)
                        xonmouseover="show_detail('/edit_node/${node.id}')"
                        title="Node ${node.id}">
 
-                        (${list(node.labels)[0]} ${node.dn()})</a>
+                        ${list(node.labels)[0]} ${node.dn()}</a>
                 </span>
                 <span metal:define-macro="edgelink">
                     <span tal:define="node edge.source" metal:use-macro="macros.nodelink" tal:omit-tag="">nodeA</span>

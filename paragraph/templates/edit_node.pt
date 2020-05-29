@@ -1,42 +1,53 @@
 <html tal:omit-tag="">
 <body tal:omit-tag="">
     <h2>Node ${node.id[:6]}</h2>
-    <form class="uk-form-horizontal">
-
+    <form class="uk-form-horizontal" id="edit-form" action="${flask.url_for('edit_node',node_id=node.id)}">
         <div>
-            <label for="_id" class="uk-form-label">id</label>
-            <div class="uk-form-controls"><input id="_id" disabled value="${node.id}" class="uk-input"></div>
+            <label for="_id" class="uk-form-label"><span class="spacer"></span>id</label>
+            <div class="uk-form-controls"><input id="_id" disabled value="${node.id}" class="uk-input uk-form-blank"></div>
         </div>
         <div>&nbsp;</div>
 
-        <div><label for="labels" class="uk-form-label" title="Comma seperated labels">labels</label>
+        <div>
+            <label for="labels" class="uk-form-label" title="Comma seperated labels">
+                <span class="spacer"></span>
+                labels
+            </label>
 
             <div class="uk-form-controls"><input name="labels" id="labels" value="${', '.join(node.labels)}"
-                      class="uk-input uk-form-blankx"/></div>
+                      class="uk-input uk-form-blank"/>
+            </div>
+            
         </div>
 
         <div tal:repeat="(key,value) [(k,v) for k,v in node.items() if k!='_id']">
-            <label for="${key}" class="uk-form-label">${key}</label>
-            <div class="uk-form-controls"><input name="${key}" id="${key}" value="${value}" class="uk-input uk-form-blankx"></div>
+            <label for="${key}" class="uk-form-label">
+                <span class="delete-checkbox">
+                    <input type="checkbox" class="uk-checkbox" name="_delete_${key}">
+                </span>
+                ${key}
+
+            </label>
+            <div class="uk-form-controls"><input name="${key}" id="${key}" value="${value}" class="uk-input uk-form-blank"></div>
         </div>
+        <div class="uk-text-muted">^ delete</div>
         <div>&nbsp;</div>
         <div>&nbsp;</div>
         <hr>
         <div>
             New Property<br/>
             <label for="_newprop_name" class="uk-form-label">name</label>
-            <div class="uk-form-controls"><input name="_newprop_name" id="_newprop_name" value="" class="uk-input"></div>
+            <div class="uk-form-controls"><input name="newprop_name" id="_newprop_name" value="" class="uk-input"></div>
         </div>
 
         <div>
             <label for="_newprop_value" class="uk-form-label">value</label>
-            <div class="uk-form-controls"><input name="_newprop_value" id="_newprop_value" value="" class="uk-input"></div>
+            <div class="uk-form-controls"><input name="newprop_value" id="_newprop_value" value="" class="uk-input"></div>
         </div>
 
         <div>
             <label for="_newprop_type" class="uk-form-label">type</label>
-            <div class="uk-form-controls"><select name="_newprop_type" id="_newprop_type" class="uk-select">
-                <option value=""></option>
+            <div class="uk-form-controls"><select name="newprop_type" id="_newprop_type" class="uk-select">
                 <option value="string">string</option>
                 <option value="int">integer</option>
             </select></div>
@@ -47,6 +58,15 @@
             <button class="uk-button uk-button-primary">Save</button>
         </div>
     </form>
-
+    <script>
+        $( "#edit-form" ).submit(function(event) {
+            event.preventDefault();
+            console.log($(this).serialize());
+            $.post($(this).attr('action'),$(this).serialize(),function(data){
+                $('#action').html(data)
+            });
+            console.log('done');
+        });
+    </script>
 </body>
 </html>

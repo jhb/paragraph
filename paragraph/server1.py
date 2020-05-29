@@ -13,11 +13,13 @@ from io import StringIO
 from paragraph.basic import ObjectDict, ResultWrapper
 import neo4j
 from paragraph.tal_templates import TalTemplates
+from flask_wtf import FlaskForm
+from wtforms import Form,StringField
 
 app = Flask(__name__)
 
 templates = TalTemplates()
-db = NeoGraphDB()
+db = NeoGraphDB(debug=0)
 
 @app.route('/')
 def hello_world():
@@ -63,10 +65,45 @@ def show_node(node_id):
     result = db.query_nodes(_id=node_id)
     return templates.show_node(db=db,node=result[0])
 
-@app.route('/edit_node/<string:node_id>')
+@app.route('/edit_node/<string:node_id>', methods=['GET','POST'])
 def edit_node(node_id):
-    result = db.query_nodes(_id=node_id)
-    return templates.edit_node(db=db,node=result[0])
+    node = db.query_nodes(_id=node_id)[0]
+    if request.form:
+        class MyForm(Form):
+            labels = StringField('labels')
+        for k,v in node.items():
+            if k in ['_id']:
+                continue
+            vt = type(v)
+            if vt is str or 1:
+                setattr(MyForm,k,StringField(k))
+        for k in ['name','value','type']:
+            name = 'newprop_'+k
+            setattr(MyForm,name,StringField(name))
+        form = MyForm(request.form)
+        if form.validate():
+            keys = list(node.keys())
+            for k in keys:
+                if '_delete_'+k in request.form:
+                    del(node[k])
+            for k in node.keys():
+                if k in ['_id']:
+                    continue
+
+                node[k]=form[k].data
+            node.labels = set([l.strip() for l in form.labels.data.split(',')])
+            if form.newprop_name.data and form.newprop_value.data and form.newprop_type.data:
+                typemap = dict(string=str,integer=int, int=int)
+                newtype = typemap.get(form.newprop_type.data,str)
+                value = newtype(form.newprop_value.data)
+                name = form.newprop_name.data
+                if name not in ['_id']:
+                    node[name]=value
+            node = db.update_node(node)
+            db.commit()
+
+
+    return templates.edit_node(db=db,node=node)
 
 
 @app.route('/show_edge/<string:edge_id>')
