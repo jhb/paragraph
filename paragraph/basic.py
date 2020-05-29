@@ -93,11 +93,9 @@ class Node(ObjectDict):
     def iN(self, *reltypes, minhops=1, maxhops=1, ids=False, **filters):
         return self.db.traverse(self).iN(*reltypes,minhops,maxhops,ids,**filters)
 
-
     def __repr__(self):
-        return "<Node(i='%s', '%s') %s>" % (self.id[:6],
-                                        ',  '.join(sorted(list(self.labels))),
-                                        ', '.join('%s=%s' % i for i in self.items() if i[0] != '_id'))
+        return "(%s %s %s)" % (next(iter(self.labels),'Node'),self.id[:6],self.dn())
+
 
     def dn(self):
         for k in ['_dn','name','id']:
@@ -132,14 +130,9 @@ class Edge(ObjectDict):
         del data['_source']
         del data['_target']
         self.update(data)
-    
-    
+
     def __repr__(self):
-        return "<Edge(i='%s',s='%s',r='%s',t='%s') %s>" % (self.id[:6],
-                                                   self.source.id[:6],
-                                                   self.reltype,
-                                                   self.target.id[:6],
-                                                   ', '.join('%s=%s' % i for i in self.items() if i[0] != '_id'))
+        return "%s --[%s]--> %s" % (self.source, self.reltype, self.target)
 
 
 class ResultWrapper:
