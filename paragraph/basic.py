@@ -91,7 +91,7 @@ class Node(ObjectDict):
         return self.db.traverse(self).oN(*reltypes,minhops=minhops,maxhops=maxhops,ids=ids,**filters)
 
     def iN(self, *reltypes, minhops=1, maxhops=1, ids=False, **filters):
-        return self.db.traverse(self).iN(*reltypes,minhops,maxhops,ids,**filters)
+        return self.db.traverse(self).iN(*reltypes,minhops=minhops,maxhops=maxhops,ids=ids,**filters)
 
     def __repr__(self):
         return "(%s %s %s)" % (next(iter(self.labels),'Node'),self.id[:6],self.dn())

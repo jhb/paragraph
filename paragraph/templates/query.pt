@@ -58,6 +58,9 @@
                     display: inline-block;
                 }
 
+                .linktable td {
+                    padding: 0px;
+                }
 
             </style>
 
@@ -80,7 +83,7 @@
                      tal:content="statement and statement or default">#result = db.traverse().oN()
 result = db.query('match (n)-[r*1..2]->(m) return n, "foo", r, m')
 for row in result.rows:
-    print(row['n'].get('name','no name'))
+    print(row['n'].get('name',row['n'].id[:6]))
 print('\nnow continue working with the result')
 print(result.rows[0]['n'].oN().nodes)
     </textarea><br>
@@ -88,26 +91,30 @@ print(result.rows[0]['n'].oN().nodes)
 
             </form>
 
-            <div class="uk-text-right"><a onClick="new_node();return false;">New node</a></div>
+            <div class="uk-text-right"><a onClick="add_node();return false;">Add node</a></div>
+            <div class="uk-text-right"><a onClick="show_detail('/add_edge');return false;">Add edge</a></div>
 
             <span tal:condition="0">
                 <span metal:define-macro="nodelink">
-                    <a href="/show_node/${node.id}"
-                       onclick="show_detail('/edit_node/${node.id}'); return false;"
-                       xonmouseover="show_detail('/edit_node/${node.id}')"
+                    <a href="/edit_node/${node.id}"
+                       onclick="show_detail($(this).attr('href')); return false;"
                        class="node${node.id}"
                        title="Node ${node.id}">
-                        ${node.labels and ', '.join(sorted(list(node.labels))) or 'Node'} ${node.dn()}</a>
+                        <span tal:omit-tag=""
+                              metal:define-macro="nodelinktext">${node.labels and ', '.join(sorted(list(node.labels))) or 'Node'} ${node.dn()}</span></a>
                 </span>
                 <span metal:define-macro="edgelink">
                     <span tal:define="node edge.source" metal:use-macro="macros.nodelink" tal:omit-tag="">nodeA</span>
-                    <a  href="/show_edge/${edge.id}" onclick="show_detail($(this).attr('href')); return false;"
-                        onmouseover="show_detail($(this).attr('href'))"
-                        title="Edge ${edge.id}">
+                    &nbsp;
+                    <a  href="/edit_edge/${edge.id}"
+                        onclick="show_detail($(this).attr('href')); return false;"
+                        class="edge${edge.id}"
+                        title="Edge ${edge.id}"
+                        metal:define-macro="edgelinka">
                         --[${edge.reltype}] -->
                     </a>
+                    &nbsp;
                     <span tal:define="node edge.target" metal:use-macro="macros.nodelink" tal:omit-tag="">nodeB</span>
-
                 </span>
             </span>
 
@@ -147,7 +154,7 @@ print(result.rows[0]['n'].oN().nodes)
                     <div>&nbsp;</div>
                      <div class="mermaid" tal:condition="result.nodes or result.edges">
                       graph TD
-                         <span tal:omit-tag="" tal:repeat="node result.allnodes().nodes">n${node.id}(${', '.join(list(node.labels))} <br/>${node.get("name",'no name')})</span>
+                         <span tal:omit-tag="" tal:repeat="node result.allnodes().nodes">n${node.id}(${', '.join(list(node.labels))} <br/>${node.get("name",node.id[:6])})</span>
                          <span tal:omit-tag="" tal:repeat="edge result.edges">n${edge.source.id}-- ${edge.reltype}-->n${edge.target.id}</span>
                          <span tal:omit-tag="" tal:repeat="node result.allnodes().nodes">click n${node.id} node_callback</span>
                       </div>
@@ -313,8 +320,8 @@ print(result.rows[0]['n'].oN().nodes)
                 mg.onEngineStop(() => mg.zoomToFit(400));
             }
 
-            var new_node = function() {
-                $.get('/new_node',function(data) {
+            var add_node = function() {
+                $.get('/add_node',function(data) {
                     //location.reload();
                     var node_id = data;
                     node_callback('n'+node_id);
