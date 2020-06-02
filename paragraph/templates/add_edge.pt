@@ -1,0 +1,53 @@
+<html tal:omit-tag="">
+<body tal:omit-tag="" tal:define="query_template load:./query.pt;
+                                  nodelink query_template.macros.nodelink;
+                                  nodelinktext query_template.macros.nodelinktext;">
+    <h2>Add edge</h2>
+    <form class="uk-form-horizontal" id="add-form" action="${flask.url_for('add_edge')}">
+        <div>
+            <label for="new_source" class="uk-form-label"><span class="spacer"></span>source</label>
+            <div class="uk-form-controls">
+            <select id="new_source" name="source" class="uk-select">
+                <option
+                    tal:repeat="node db.query_nodes().nodes"
+                    tal:attributes="value node.id"
+                ><span metal:use-macro="nodelinktext" /></option>
+            </select>
+                </div>
+        </div>
+
+        <div style="height:5px;">&nbsp;</div>
+
+        <div>
+            <label for="_id" class="uk-form-label"><span class="spacer"></span>reltype</label>
+            <div class="uk-form-controls">
+                <input class="uk-input" name="reltype" required>
+            </div>
+        </div>
+        <div style="height:5px;">&nbsp;</div>
+        <div>
+            <label for="new_target" class="uk-form-label"><span class="spacer"></span>target</label>
+            <div class="uk-form-controls">
+            <select id="new_target" name="target" class="uk-select">
+                <option
+                    tal:repeat="node db.query_nodes().nodes"
+                    tal:attributes="value node.id"
+                ><span metal:use-macro="nodelinktext" /></option>
+            </select>
+                </div>
+        </div>
+        <div style="height:5px;">&nbsp;</div>
+        <button class="uk-button uk-button-primary">Create</button>
+    </form>
+    <script>
+        $( "#add-form" ).submit(function(event) {
+            event.preventDefault();
+            $.post($(this).attr('action'),$(this).serialize(),function(data){
+                $('#action').html(data)
+            });
+            console.log('done');
+        });
+
+    </script>
+</body>
+</html>

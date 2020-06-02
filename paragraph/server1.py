@@ -13,11 +13,13 @@ from io import StringIO
 from paragraph.basic import ObjectDict, ResultWrapper
 import neo4j
 from paragraph.tal_templates import TalTemplates
+from flask_wtf import FlaskForm
+from wtforms import Form,StringField
 
 app = Flask(__name__)
 
 templates = TalTemplates()
-db = NeoGraphDB()
+db = NeoGraphDB(debug=0)
 
 @app.route('/')
 def hello_world():
@@ -60,21 +62,100 @@ def query():
 
 @app.route('/show_node/<string:node_id>')
 def show_node(node_id):
-    result = db.query_nodes(_id=node_id)
+    result = db.query_nodes(_id=node_id).nodes
     return templates.show_node(db=db,node=result[0])
 
-@app.route('/edit_node/<string:node_id>')
-def edit_node(node_id):
-    result = db.query_nodes(_id=node_id)
-    return templates.edit_node(db=db,node=result[0])
 
+def edit_obj(obj,request,excluded=['_id']):
+    class MyForm(Form):
+            labels = StringField('labels')
+    for k,v in obj.items():
+        if k in ['_id']:
+            continue
+        vt = type(v)
+        if vt is str or 1:
+            setattr(MyForm,k,StringField(k))
+    for k in ['name','value','type']:
+        name = 'newprop_'+k
+        setattr(MyForm,name,StringField(name))
+    form = MyForm(request.form)
+    if form.validate():
+        keys = list(obj.keys())
+        for k in keys:
+            if '_delete_'+k in request.form:
+                del(obj[k])
+        for k in obj.keys():
+            if k in excluded:
+                continue
+
+            obj[k]=form[k].data
+        obj.labels = set([l.strip() for l in form.labels.data.split(',')])
+        if form.newprop_name.data and form.newprop_value.data and form.newprop_type.data:
+            typemap = dict(string=str,integer=int, int=int)
+            newtype = typemap.get(form.newprop_type.data,str)
+            value = newtype(form.newprop_value.data)
+            name = form.newprop_name.data
+            if name not in excluded:
+                obj[name]=value
+        return True
+    else:
+        return False
+
+
+@app.route('/edit_node/<string:node_id>', methods=['GET','POST'])
+def edit_node(node_id):
+    node = db.query_nodes(_id=node_id).nodes[0]
+    if request.form:
+        validated = edit_obj(node,request)
+        if validated:
+            node = db.update_node(node)
+            db.commit()
+    return templates.edit_node(db=db,node=node)
+
+@app.route('/edit_edge/<string:edge_id>', methods=['GET','POST'])
+def edit_edge(edge_id):
+    edge = db.query_edges(_id=edge_id).edges[0]
+    if request.form:
+        validated = edit_obj(edge,request)
+        if validated:
+            edge = db.update_edge(edge)
+            db.commit()
+    return templates.edit_edge(db=db,edge=edge)
+
+@app.route('/add_node')
+def add_node():
+    node = db.add_node()
+    db.commit()
+    return node.id
+
+@app.route('/delete_node/<string:node_id>')
+def delete_node(node_id):
+    db.del_node(node_id,True)
+    db.commit()
+    return ''
 
 @app.route('/show_edge/<string:edge_id>')
 def show_edge(edge_id):
     result = db.query_edges(_id=edge_id)
     return templates.show_edge(db=db,edge=result[0])
 
+@app.route('/add_edge', methods=['GET','POST'])
+def add_edge():
+    if request.form:
+        edge = db.add_edge(request.form['source'],
+                           request.form['reltype'],
+                           request.form['target'])
+        db.commit()
+        return templates.edit_edge(db=db,edge=edge)
+    else:
+        return templates.add_edge(db=db)
 
+
+@app.route('/delete_edge/<string:edge_id>')
+def delete_edge(edge_id):
+    db.del_edge(edge_id)
+    db.commit()
+    return ''
 
 if __name__ == '__main__':
     app.run(debug=True)

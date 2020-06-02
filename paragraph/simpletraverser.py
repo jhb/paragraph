@@ -38,9 +38,9 @@ class SimpleTraverser(ResultWrapper):
                 else:
                     self.nodes_seen.add(node)
                 if otherattribute=='target':
-                    edges = self.g.query_edges(*reltypes, source=node)
+                    edges = self.g.query_edges(*reltypes, source=node).edges
                 else:
-                    edges = self.g.query_edges(*reltypes, target=node)
+                    edges = self.g.query_edges(*reltypes, target=node).edges
                 for edge in edges:
                     if edge in self.edges_seen:
                         continue
