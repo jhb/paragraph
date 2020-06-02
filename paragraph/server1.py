@@ -62,12 +62,12 @@ def query():
 
 @app.route('/show_node/<string:node_id>')
 def show_node(node_id):
-    result = db.query_nodes(_id=node_id)
+    result = db.query_nodes(_id=node_id).nodes
     return templates.show_node(db=db,node=result[0])
 
 @app.route('/edit_node/<string:node_id>', methods=['GET','POST'])
 def edit_node(node_id):
-    node = db.query_nodes(_id=node_id)[0]
+    node = db.query_nodes(_id=node_id).nodes[0]
     if request.form:
         class MyForm(Form):
             labels = StringField('labels')
@@ -105,6 +105,17 @@ def edit_node(node_id):
 
     return templates.edit_node(db=db,node=node)
 
+@app.route('/new_node')
+def new_node():
+    node = db.add_node()
+    db.commit()
+    return node.id
+
+@app.route('/delete_node/<string:node_id>')
+def delete_node(node_id):
+    db.del_node(node_id,True)
+    db.commit()
+    return ''
 
 @app.route('/show_edge/<string:edge_id>')
 def show_edge(edge_id):

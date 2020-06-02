@@ -88,13 +88,16 @@ print(result.rows[0]['n'].oN().nodes)
 
             </form>
 
+            <div class="uk-text-right"><a onClick="new_node();return false;">New node</a></div>
+
             <span tal:condition="0">
                 <span metal:define-macro="nodelink">
-                    <a href="/show_node/${node.id}" onclick="show_detail('/edit_node/${node.id}'); return false;"
+                    <a href="/show_node/${node.id}"
+                       onclick="show_detail('/edit_node/${node.id}'); return false;"
                        xonmouseover="show_detail('/edit_node/${node.id}')"
+                       class="node${node.id}"
                        title="Node ${node.id}">
-
-                        ${list(node.labels)[0]} ${node.dn()}</a>
+                        ${node.labels and ', '.join(sorted(list(node.labels))) or 'Node'} ${node.dn()}</a>
                 </span>
                 <span metal:define-macro="edgelink">
                     <span tal:define="node edge.source" metal:use-macro="macros.nodelink" tal:omit-tag="">nodeA</span>
@@ -123,7 +126,7 @@ print(result.rows[0]['n'].oN().nodes)
                         <b>Nodes</b>
 
                         <ul class="uk-list uk-list-bullet">
-                            <li tal:repeat="node result.nodes">
+                            <li tal:repeat="node result.nodes" tal:attributes="class 'node'+node.id">
                                 <span metal:use-macro="macros.nodelink"></span>
                             </li>
                         </ul>
@@ -186,7 +189,9 @@ print(result.rows[0]['n'].oN().nodes)
         </td>
         <td style="border-left: 0.5px solid darkgrey; min-height: 50vh; max-height: 50vh; min-width: 100%">
             <div id="action"></div>
+
         </td>
+
     </tr>
 </table>
 <div id="samplediv" style="height:0;width:0;outline:none;border:none;padding:none;margin:none;box-sizing:content-box;"></div>
@@ -307,6 +312,15 @@ print(result.rows[0]['n'].oN().nodes)
                 ;
                 mg.onEngineStop(() => mg.zoomToFit(400));
             }
+
+            var new_node = function() {
+                $.get('/new_node',function(data) {
+                    //location.reload();
+                    var node_id = data;
+                    node_callback('n'+node_id);
+                })
+            }
+
             start_3d();
         </script>
             </span>

@@ -111,8 +111,8 @@ class NeoGraphDB:
                               MATCH (n) WHERE ALL(k in keys(filters) WHERE filters[k] = n[k])
                               return n''',
                            filters=filters)
-        return [self._neo2node(r['n']) for r in result]
-
+        #return Neo4jWrapper([self._neo2node(r['n']) for r in result],self)
+        return Neo4jWrapper(result,self)
     def add_edge(self, source, reltype, target, **properties):
         if '_id' not in properties:
             properties['_id'] = self._new_uid()
@@ -192,7 +192,7 @@ class NeoGraphDB:
             if type(nodes) != list:
                 nodes = [nodes]
         else:
-            nodes = self.query_nodes(**filters)
+            nodes = self.query_nodes(**filters).nodes
         return SimpleTraverser(self, nodes)
 
     def _recursive_replace(self,object):
