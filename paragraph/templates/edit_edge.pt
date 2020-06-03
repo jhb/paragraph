@@ -1,5 +1,6 @@
 <html tal:omit-tag="">
-<body tal:omit-tag="" tal:define="query_template load:./query.pt; nodelink query_template.macros.nodelink">
+<body tal:omit-tag="" tal:define="gmi_template load:./gmi.pt;
+                                  nodelink gmi_template.macros.nodelink">
     <h2>Edge ${edge.id[:6]}</h2>
     <form class="uk-form-horizontal" id="edit-form" action="${flask.url_for('edit_edge',edge_id=edge.id)}">
         <div>
@@ -9,7 +10,7 @@
 
             </div>
         </div>
-        <div style="height:5px;">&nbsp;</div>
+        <div style="height:10px;">&nbsp;</div>
         <div>
             <label for="_id" class="uk-form-label"><span class="spacer"></span>source</label>
             <div class="uk-form-controls"><span class="uk-text-muted" tal:define="node edge.source">
@@ -17,7 +18,7 @@
             </span></div>
         </div>
 
-        <div style="height:5px;">&nbsp;</div>
+        <div style="height:10px;">&nbsp;</div>
 
         <div>
             <label for="_id" class="uk-form-label"><span class="spacer"></span>reltype</label>
@@ -25,7 +26,7 @@
                 <span tal:content="edge.reltype"></span>
             </div>
         </div>
-        <div style="height:5px;">&nbsp;</div>
+        <div style="height:10px;">&nbsp;</div>
         <div>
             <label for="_id" class="uk-form-label"><span class="spacer"></span>target</label>
             <div class="uk-form-controls"><span class="uk-text-muted" tal:define="node edge.target">

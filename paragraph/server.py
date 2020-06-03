@@ -27,8 +27,8 @@ def hello_world():
 
 
 
-@app.route('/query')
-def query():
+@app.route('/gmi')
+def gmi():
     result =None
     if request.values:
         print(request.values.get('statement'))
@@ -58,7 +58,7 @@ def query():
         printvalue = ''
     if not isinstance(result, ResultWrapper):
         result = ResultWrapper(result)
-    return templates.query(db=db,result=result, printvalue=printvalue)
+    return templates.gmi(db=db,result=result, printvalue=printvalue)
 
 @app.route('/show_node/<string:node_id>')
 def show_node(node_id):

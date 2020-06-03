@@ -98,7 +98,7 @@ class Node(ObjectDict):
 
 
     def dn(self):
-        for k in ['_dn','name','id']:
+        for k in ['_dn','name','title','id']:
             if k in self:
                 return self[k]
         return self.id[:6]
