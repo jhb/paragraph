@@ -28,7 +28,7 @@ def test_update_node(db):
 def test_query_node(db, testdata):
     "Nodes can be queried"
     r = db.query_nodes(_id=testdata.node.id)
-    assert r[0] == testdata.node
+    assert r.nodes[0] == testdata.node
 
 
 def test_delete_node(db):
@@ -39,11 +39,11 @@ def test_delete_node(db):
 
     # Now its there
     r = db.query_nodes(_id=n4.id)
-    assert r[0] == n4
+    assert r.nodes[0] == n4
 
     # Now its not...
     db.del_node(n4.id)
-    assert db.query_nodes(_id=n4.id) == []
+    assert db.query_nodes(_id=n4.id).nodes == []
 
 
 def test_jsonify_node(testdata):
@@ -84,17 +84,17 @@ def test_update_edge(db, testdata):
 
 def test_query_edge(db, testdata):
     testedge = db.add_edge(testdata.alice, 'testrel', testdata.bob, bar='foo')
-    newedge = db.query_edges('testrel', bar='foo')[0]
+    newedge = db.query_edges('testrel', bar='foo').edges[0]
     assert newedge == testedge
-    newedge = db.query_edges(bar='foo')[0]
+    newedge = db.query_edges(bar='foo').edges[0]
     assert newedge == testedge
 
 
 def test_delete_edge(db, testdata):
     testedge = db.add_edge(testdata.alice, 'testrel', testdata.bob, bar='foo')
-    assert len(db.query_edges(bar='foo')) > 0
+    assert len(db.query_edges(bar='foo').edges) > 0
     db.del_edge(testedge.id)
-    assert len(db.query_edges(bar='foo')) == 0
+    assert len(db.query_edges(bar='foo').edges) == 0
 
 def test_jsonify_edge(ld):
     "An edge can be serialized to python. The special properties are set"
@@ -120,14 +120,14 @@ def test_edge_source_property(ld):
 def test_query_edge_source(db, ld):
     db = ld.db
     r = db.query_edges(source=ld.bob)
-    assert r == [ld.e2]
+    assert r.edges == [ld.e2]
 
 def test_query(db):
     r = db.query('match (n) return count(n) as c')
     assert r.rows[0]['c']==0
 
 def test_same_objects(db, ld):
-    a1 = db.query_nodes(name='alice')[0]
-    a2 = db.query_nodes(name='alice')[0]
+    a1 = db.query_nodes(name='alice').nodes[0]
+    a2 = db.query_nodes(name='alice').nodes[0]
     assert id(a1) == id(a2)
 

@@ -10,7 +10,7 @@ Usage example from neo4j:
 Alice is a node. Nodes have a unique id and labels:
 
     >>> alice
-    <Node(i='...','Person') name=alice>
+    (Person ... alice)
 
 But a note also stores properties like a dictionary:
 
@@ -40,7 +40,7 @@ Now lets link alice to bob:
 And again, all other properties are stored dictionary-style in the edge:
 
     >>> edge
-    <Edge(i='...',s='...',r='friend_of',t='...') foo=bar>
+    (Person ... alice) --[friend_of]--> (Person ... bob)
     >>> dict(edge)
     {'_id': '...', 'foo': 'bar'}
 

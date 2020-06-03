@@ -1,7 +1,7 @@
 <html tal:omit-tag="">
-<body tal:omit-tag="" tal:define="query_template load:./query.pt;
-                                  nodelink query_template.macros.nodelink;
-                                  edgelinka query_template.macros.edgelinka;">
+<body tal:omit-tag="" tal:define="gmi_template load:./gmi.pt;
+                                  nodelink gmi_template.macros.nodelink;
+                                  edgelinka gmi_template.macros.edgelinka;">
     <h2>Node ${node.id[:6]}</h2>
     <form class="uk-form-horizontal" id="edit-form" action="${flask.url_for('edit_node',node_id=node.id)}">
         <div>

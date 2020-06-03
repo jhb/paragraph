@@ -1,7 +1,7 @@
 <html tal:omit-tag="">
-<body tal:omit-tag="" tal:define="query_template load:./query.pt;
-                                  nodelink query_template.macros.nodelink;
-                                  nodelinktext query_template.macros.nodelinktext;">
+<body tal:omit-tag="" tal:define="gmi_template load:./gmi.pt;
+                                  nodelink gmi_template.macros.nodelink;
+                                  nodelinktext gmi_template.macros.nodelinktext;">
     <h2>Add edge</h2>
     <form class="uk-form-horizontal" id="add-form" action="${flask.url_for('add_edge')}">
         <div>
