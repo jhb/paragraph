@@ -37,6 +37,7 @@ def gmi():
         printed = StringIO()
         vars = ObjectDict(printed=printed, db=db,result=None, SimpleTraverser=SimpleTraverser)
         stdout = sys.stdout
+        request.stdout = stdout
         try:
             sys.stdout = printed
             exec(request.values.get('statement', ''), vars)
@@ -53,10 +54,10 @@ def gmi():
                 top = exinfo[2].tb_next
                 line = top.tb_lineno
             printvalue = printed.getvalue()
-            printvalue += """\n== Error on input line %s ==\n%s: %s\n""" %(line,
+            printvalue += """\n== Error on input line %s ==\n%s: %s\n \n%s""" %(line,
                                                                                 e.__class__.__name__,
-                                                                                str(e),)
-                                                                                #traceback.format_exc())
+                                                                                str(e),
+                                                                                traceback.format_exc())
         finally:
             sys.stdout=stdout
     else:

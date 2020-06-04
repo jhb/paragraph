@@ -202,13 +202,12 @@ class NeoGraphDB:
         objecttype = type(object)
         if objecttype is neo4j.Node:
             return self._neo2node(object)
+        elif objecttype in [list,tuple,neo4j.Path]:
+            return [self._recursive_replace(o) for o in object]
         elif objecttype is neo4j.Relationship or hasattr(object,'start_node'): # neo4j, I love you:
             return self._neo2edge(object)
-        elif objecttype in [list,tuple]:
-            return [self._recursive_replace(o) for o in object]
         elif hasattr(object, 'keys'):
             return {k:self._recursive_replace(object[k]) for k in object.keys()}
-        # path
         else:
             return object
 
