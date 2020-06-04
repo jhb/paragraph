@@ -1,0 +1,59 @@
+.CodeMirror {
+    border: 1px solid black;
+    height: 8em !important;
+    width: 50vw;
+    resize: vertical;
+}
+
+.code {
+    counter-reset: listing;
+    border: 1px dashed grey;
+    padding: 2px;
+    width: 100%;
+}
+
+code {
+    counter-increment: listing;
+}
+
+.code code:before {
+    content: counter(listing) "";
+    color: #AAAAAA;
+    display: inline-block;
+    min-width: 2em;
+    background-color: #F7F7F7;
+    border-right: 1px solid #DDDDDD;
+    text-align: right;
+    margin-right: 0.5em;
+}
+
+.error {
+    border: 1px dashed red
+}
+
+.uk-tooltip {
+    word-wrap: break-word;
+    max-width: 100%;
+}
+
+.basetable td, tr {
+    padding: 15px;
+}
+
+.spacer {
+    width: 2em;
+    display: inline-block;
+}
+
+.delete-checkbox {
+    width: 2em;
+    display: inline-block;
+}
+
+.linktable td {
+    padding: 0px;
+}
+
+body {
+    font-size: 0.9em;
+}
