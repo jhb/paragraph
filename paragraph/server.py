@@ -4,7 +4,7 @@ import mimetypes
 mimetypes.add_type('text/css', '.css')
 mimetypes.add_type('text/javascript', '.js')
 
-
+import traceback
 from flask import Flask, request
 from paragraph.NeoGraphDB import NeoGraphDB
 from paragraph.simpletraverser import SimpleTraverser
@@ -17,6 +17,8 @@ from flask_wtf import FlaskForm
 from wtforms import Form,StringField
 
 app = Flask(__name__)
+# turn of caching for static files during development
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 templates = TalTemplates()
 db = NeoGraphDB(debug=0)
@@ -51,7 +53,10 @@ def gmi():
                 top = exinfo[2].tb_next
                 line = top.tb_lineno
             printvalue = printed.getvalue()
-            printvalue += """\n== Error on input line %s ==\n%s: %s\n""" %(line, e.__class__.__name__,str(e))
+            printvalue += """\n== Error on input line %s ==\n%s: %s\n""" %(line,
+                                                                                e.__class__.__name__,
+                                                                                str(e),)
+                                                                                #traceback.format_exc())
         finally:
             sys.stdout=stdout
     else:

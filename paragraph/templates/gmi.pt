@@ -15,59 +15,6 @@
              <script src="//unpkg.com/three"></script>
             <script src="//unpkg.com/three-spritetext"></script>
             <script src="//unpkg.com/3d-force-graph"></script>
-
-            <style>
-                .CodeMirror{border: 1px solid black;
-                            height: 10em;
-                            width: 50vw;
-                            resize: vertical;
-                }
-                .code { counter-reset: listing;
-                        border: 1px dashed grey;
-                        padding: 2px;
-                        width: 100%;}
-                code { counter-increment: listing; }
-                .code code:before {
-                    content: counter(listing) "";
-                    color: #AAAAAA;
-                    display: inline-block;
-                    min-width: 2em;
-                    background-color: #F7F7F7;
-                    border-right: 1px solid #DDDDDD;
-                    text-align: right;
-                    margin-right: 0.5em;
-                   }
-                .error {border: 1px dashed red}
-
-                .uk-tooltip {
-                    word-wrap: break-word;
-                    max-width:100%;
-                }
-
-                .basetable td,tr {
-                    padding: 15px;
-                }
-
-                .spacer {
-                    width: 2em;
-                    display: inline-block;
-                }
-
-                .delete-checkbox {
-                    width: 2em;
-                    display: inline-block;
-                }
-
-                .linktable td {
-                    padding: 0px;
-                }
-                body {
-                    font-size: 0.9em;
-                }
-
-            </style>
-
-
         </span>
     </head>
     <body>
@@ -236,11 +183,7 @@ print(result.rows[0]['n'].oN().nodes)
             }
             mermaid.initialize({startOnLoad: false,securityLevel:'loose'});
 
-            function show_detail(path){
-                $.get(path, function (data) {
-                    $('#action').html(data);
-                })
-            }
+
 
             // for mermaid
             var node_callback = function(idstring) {
@@ -250,88 +193,7 @@ print(result.rows[0]['n'].oN().nodes)
 
             }
 
-            var node_3d_callback = function (node,event) {
-                var path = '/edit_node/'+node.id;
-                show_detail(path);
-            }
-
-            var div = document.getElementById('samplediv');
-            div.style.height = '1em';
-            var em = div.offsetHeight;
-
-
-            var start_3d = function() {
-                var myGraph = ForceGraph3D({ controlType: 'orbit' });
-                var canvas = document.getElementById('3d-graph');
-                var data = JSON.parse($('#3d-graph-data').text());
-
-                console.log(data);
-                mg = myGraph(canvas);
-                console.log(em);
-                mg.height(40*em);
-                mg.width(50*em);
-                mg.cooldownTicks(100);
-                mg.backgroundColor('#FFFFFF')
-
-                mg.graphData(data);
-                mg.nodeAutoColorBy('name');
-                mg.nodeThreeObject(node => {
-                  // use a sphere as a drag handle
-                  const obj = new THREE.Mesh(
-                    new THREE.SphereGeometry(10),
-                    new THREE.MeshBasicMaterial({ depthWrite: false, transparent: true, opacity: 0 })
-                  );
-
-                  // add text sprite as child
-                  const sprite = new SpriteText(node.name);
-                  sprite.color = node.color;
-                  sprite.textHeight = 6;
-                  obj.add(sprite);
-
-                  return obj;
-                });
-                mg.onNodeClick(node_3d_callback);
-                mg.onNodeHover(function(){});
-                mg.linkThreeObjectExtend(true);
-                mg.linkThreeObject(link => {
-                  // extend link with text sprite
-                  const sprite = new SpriteText(`$$${link.reltype}`);
-                  sprite.color = 'darkgrey';
-                  sprite.textHeight = 3.5;
-                  return sprite;
-                })
-                .linkPositionUpdate((sprite, { start, end }) => {
-                  const middlePos = Object.assign(...['x', 'y', 'z'].map(c => ({
-                    [c]: start[c] + (end[c] - start[c]) / 2 // calc middle point
-                  })));
-
-                  // Position sprite
-                  Object.assign(sprite.position, middlePos);
-                });
-                //mg.linkDirectionalParticles(5);
-                mg.d3Force('charge').strength(-120);
-                mg
-                    //.linkWidth(1)
-                    .linkCurvature(0)
-                    .linkDirectionalArrowLength(3.5)
-                    .linkDirectionalArrowRelPos(1)
-                    .linkDirectionalArrowColor(function(link){return "lightgrey"})
-                    .linkColor(function(link){return "darkgrey"})
-                    //.linkAutoColorBy('reltype')
-                    .linkOpacity(0.3)
-                ;
-                mg.onEngineStop(() => mg.zoomToFit(400));
-            }
-
-            var add_node = function() {
-                $.get('/add_node',function(data) {
-                    //location.reload();
-                    var node_id = data;
-                    node_callback('n'+node_id);
-                })
-            }
-
-            start_3d();
+            $(start_3d());
         </script>
             </span>
 </span>
