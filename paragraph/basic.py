@@ -163,7 +163,7 @@ class ResultWrapper:
 
     def graphjson(self):
         out = {}
-        out['nodes'] = [dict(id=node.id,name=node.dn()) for node in self.nodes]
+        out['nodes'] = [dict(id=node.id,name=node.dn()) for node in self.allnodes().nodes]
         out['links'] = [dict(source=edge.source.id,target=edge.target.id,reltype=edge.reltype) for edge in self.edges]
         return json.dumps(out,indent=2)
 
