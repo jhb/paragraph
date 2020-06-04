@@ -1,6 +1,6 @@
 .CodeMirror {
     border: 1px solid black;
-    height: 10em;
+    height: 8em !important;
     width: 50vw;
     resize: vertical;
 }

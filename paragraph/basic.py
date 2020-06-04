@@ -98,7 +98,7 @@ class Node(ObjectDict):
 
 
     def dn(self):
-        for k in ['_dn','name','title','id']:
+        for k in ['_dn','name','title','_techname','id']:
             if k in self:
                 return self[k]
         return self.id[:6]
@@ -166,6 +166,14 @@ class ResultWrapper:
         out['nodes'] = [dict(id=node.id,name=node.dn()) for node in self.allnodes().nodes]
         out['links'] = [dict(source=edge.source.id,target=edge.target.id,reltype=edge.reltype) for edge in self.edges]
         return json.dumps(out,indent=2)
+
+    def allnodes(self):
+        return self
+
+    def traverse(self):
+        return self.db.traverse(nodes=self.nodes)
+
+
 
 # Interfaces
 

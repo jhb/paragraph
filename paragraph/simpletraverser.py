@@ -1,6 +1,6 @@
 from _collections import OrderedDict
 
-from paragraph.basic import Traversal, GraphDB, ResultWrapper
+from paragraph.basic import Traversal, GraphDB, ResultWrapper, Node
 
 
 class SimpleTraverser(ResultWrapper):

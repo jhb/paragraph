@@ -28,7 +28,8 @@ class NeoGraphDB:
         self.session = self.driver.session()
         self.tx = None
         self.debug = debug
-        self._cache = {}
+        self._nodecache = {}
+        self._edgecache = {}
 
     def begin(self):
         """Begin a transaction
@@ -49,24 +50,24 @@ class NeoGraphDB:
 
     def _neo2node(self, neonode):
         nodeid = neonode['_id']
-        if nodeid not in self._cache:
+        if nodeid not in self._nodecache:
             node = Node(self)
             node.update(neonode)
             node.labels.update(neonode.labels)
-            self._cache[nodeid] = node
-        return self._cache[nodeid]
+            self._nodecache[nodeid] = node
+        return self._nodecache[nodeid]
 
 
     def _neo2edge(self, relation):
         edgeid = relation['_id']
-        if edgeid not in self._cache:
+        if edgeid not in self._edgecache:
             edge = Edge(db = self,
                         source=self._neo2node(relation.start_node),
                         reltype=relation.type,
                         target=self._neo2node(relation.end_node))
             edge.update(relation.items())
-            self._cache[edgeid] = edge
-        return self._cache[edgeid]
+            self._edgecache[edgeid] = edge
+        return self._edgecache[edgeid]
 
     def _nodeid(self, nodeid):
         if type(nodeid) is Node:
@@ -211,6 +212,9 @@ class NeoGraphDB:
         else:
             return object
 
+    def _fix_ids(self):
+        pass
+
 
 class Neo4jWrapper(ResultWrapper):
 
@@ -222,8 +226,7 @@ class Neo4jWrapper(ResultWrapper):
         self.edges = [self.db._recursive_replace(e) for e in graph.relationships]
 
 
-    def allnodes(self):
-        return self
+
 
 if __name__ == "__main__":
     db = NeoGraphDB()
