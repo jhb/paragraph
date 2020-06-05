@@ -28,7 +28,10 @@ def test_oN(ld):
     assert ld.charlie in r.nodes
 
 
-
+def test_BN(ld):
+    db = ld.db
+    r = db.traverse(name='charlie').bN()
+    assert r.nodes == {ld.alice,ld.bob,ld.dora}
 
 def test_linked(ld):
     db = ld.db

@@ -27,6 +27,21 @@ class SimpleTraverser(ResultWrapper):
     def iN(self, *reltypes, minhops=1, maxhops=1, ids=False, **filters):
         return self._traverseN('source', *reltypes, minhops=minhops, maxhops=maxhops, ids=ids, **filters)
 
+    def bN(self, *reltypes, minhops=1, maxhops=1, ids=False, **filters):
+        outN = self._copy().oN(*reltypes, minhops=minhops, maxhops=maxhops, ids=ids, **filters)
+        inN = self._copy().iN(*reltypes, minhops=minhops, maxhops=maxhops, ids=ids, **filters)
+        both = SimpleTraverser(self.g, nodes = outN.nodes | inN.nodes, prev = self)
+        both.nodes_seen = outN.nodes_seen | inN.nodes_seen
+        both.edges_seen = outN.edges_seen | inN.edges_seen
+        return both
+
+    def _copy(self):
+        out = SimpleTraverser(self.g, nodes=set(self.nodes))
+        out.nodes_seen = set(self.nodes_seen)
+        out.edges_seen  = set(self.edges_seen)
+        out.prev = self.prev
+        return out
+
     def _traverseN(self, otherattribute, *reltypes, minhops=1, maxhops=1, ids=False, **filters):
         thisround = set(self.nodes)
         nextround = set()
