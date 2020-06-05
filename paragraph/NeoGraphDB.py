@@ -108,9 +108,10 @@ class NeoGraphDB:
             result = self._run("match (n) where n._id=$_id delete n", _id=_id)
 
     def query_nodes(self, *labels, **filters):
+        labelstring = self._labels2string(labels)
         result = self._run('''WITH $filters as filters 
-                              MATCH (n) WHERE ALL(k in keys(filters) WHERE filters[k] = n[k])
-                              return n''',
+                              MATCH (n%s) WHERE ALL(k in keys(filters) WHERE filters[k] = n[k])
+                              return n''' % labelstring,
                            filters=filters)
         #return Neo4jWrapper([self._neo2node(r['n']) for r in result],self)
         return Neo4jWrapper(result,self)
@@ -191,12 +192,17 @@ class NeoGraphDB:
         result = self._run(statement,**params)
         return Neo4jWrapper(result, self)
 
-    def traverse(self, nodes=None, **filters):
+    def traverse(self, nodes=None, labels=None,  **filters):
+        if labels is None:
+            labels = []
+        elif type(labels) is str:
+            labels = [labels]
         if nodes:
             if type(nodes) != list:
                 nodes = [nodes]
         else:
-            nodes = self.query_nodes(**filters).nodes
+            nodes = self.query_nodes(*labels, **filters).nodes
+
         return SimpleTraverser(self, nodes)
 
     def _recursive_replace(self,object):

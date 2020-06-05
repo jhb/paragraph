@@ -18,7 +18,7 @@
                 labels
             </label>
 
-            <div class="uk-form-controls"><input name="labels" id="labels" value="${', '.join(sorted(list(node.labels)))}"
+            <div class="uk-form-controls"><input name="labels" id="labels" value="${':'.join(sorted(list(node.labels)))}"
                       class="uk-input uk-form-blank"/>
             </div>
             

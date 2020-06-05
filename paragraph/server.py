@@ -95,7 +95,7 @@ def edit_obj(obj,request,excluded=['_id']):
                 continue
 
             obj[k]=form[k].data
-        obj.labels = set([l.strip() for l in form.labels.data.split(',')])
+        obj.labels = set([l.strip() for l in form.labels.data.split(':')])
         if form.newprop_name.data and form.newprop_value.data and form.newprop_type.data:
             typemap = dict(string=str,integer=int, int=int)
             newtype = typemap.get(form.newprop_type.data,str)
