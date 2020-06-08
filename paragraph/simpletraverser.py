@@ -31,8 +31,9 @@ class SimpleTraverser(ResultWrapper):
         outN = self._copy().oN(*reltypes, minhops=minhops, maxhops=maxhops, ids=ids, **filters)
         inN = self._copy().iN(*reltypes, minhops=minhops, maxhops=maxhops, ids=ids, **filters)
         both = SimpleTraverser(self.g, nodes = outN.nodes | inN.nodes, prev = self)
-        both.nodes_seen = outN.nodes_seen | inN.nodes_seen
-        both.edges_seen = outN.edges_seen | inN.edges_seen
+        both.nodes_seen.update(outN.nodes_seen | inN.nodes_seen)
+        both.edges_seen.update(outN.edges_seen | inN.edges_seen)
+        both.edges = both.edges_seen
         return both
 
     def _copy(self):
