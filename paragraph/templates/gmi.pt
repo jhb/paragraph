@@ -69,12 +69,12 @@ print(result.rows[0]['n'].oN().nodes)
             </span>
 
             <div>&nbsp</div>
-            <ul class="uk-subnav" uk-tab>
-                <li><a href="#">List</a></li>
-                <li><a href="#">Graph</a></li>
-                <li><a href="#">3D</a></li>
-                <li><a href="#">Table</a></li>
-                <li><a href="#">Printed</a></li>
+            <ul class="uk-subnav" uk-tab id="tabs">
+                <li><a href="#"  onClick="Cookies.set('showtab',0);">List</a></li>
+                <li><a href="#"  onClick="Cookies.set('showtab',1);">Graph</a></li>
+                <li><a href="#"  onClick="Cookies.set('showtab',2);">3D</a></li>
+                <li><a href="#"  onClick="Cookies.set('showtab',3);">Table</a></li>
+                <li><a href="#"  onClick="Cookies.set('showtab',4);">Printed</a></li>
             </ul>
             <div class="uk-switcher">
 
@@ -99,7 +99,7 @@ print(result.rows[0]['n'].oN().nodes)
                     </div>
                 </div>
 
-                 <div onshow="mermaid.init({securityLevel:'loose'},'.mermaid')">
+                 <div onshow="mermaid.init({securityLevel:'loose'},'.mermaid');">
                     <div><b>Graph</b></div>
                     <div>&nbsp;</div>
                      <div class="mermaid" tal:condition="result.nodes or result.edges">
@@ -193,7 +193,13 @@ print(result.rows[0]['n'].oN().nodes)
 
             }
 
-            $(start_3d());
+
+
+            $(function() {
+                start_3d();
+                UIkit.tab('#tabs').show(Cookies.get('showtab')||0);
+            });
+
         </script>
             </span>
 </span>
