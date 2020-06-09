@@ -6,6 +6,7 @@ from neo4j import GraphDatabase, BoltStatementResult
 import neo4j
 
 from paragraph.basic import GraphDB, Node, Edge, ResultWrapper
+from paragraph.schemahandler import Schemahandler
 from paragraph.simpletraverser import SimpleTraverser
 
 
@@ -221,6 +222,9 @@ class NeoGraphDB:
     def _fix_ids(self):
         pass
 
+    @property
+    def schemahandler(self):
+        return Schemahandler(self)
 
 class Neo4jWrapper(ResultWrapper):
 

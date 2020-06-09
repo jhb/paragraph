@@ -2,7 +2,9 @@
 <body tal:omit-tag="" tal:define="gmi_template load:./gmi.pt;
                                   nodelink gmi_template.macros.nodelink;
                                   edgelinka gmi_template.macros.edgelinka;">
-    <h2>Node ${node.id[:6]}</h2>
+    <div class="uk-h3">Node ${node.id[:6]}
+        <div class="uk-text-meta">Schemata: ${', '.join([s['_schemaname'] for s in db.schemahandler.find_schemata(node)])}</div>
+    </div>
     <form class="uk-form-horizontal" id="edit-form" action="${flask.url_for('edit_node',node_id=node.id)}">
         <div>
             <label for="_id" class="uk-form-label"><span class="spacer"></span>id</label>
@@ -11,7 +13,6 @@
             </div>
         </div>
         <div>&nbsp;</div>
-
         <div>
             <label for="labels" class="uk-form-label" title="Comma seperated labels">
                 <span class="spacer"></span>
@@ -44,7 +45,7 @@
             <div class="uk-form-controls">
                 <input name="newprop_name" id="_newprop_name" value="" class="uk-input" list="propertynames" autocomplete="off">
                 <datalist id="propertynames">
-                    <option tal:repeat="propertynode sorted(db.query_nodes('_Property').nodes,key=lambda x: x._techname)"
+                    <option tal:repeat="propertynode db.schemahandler.propertynodes"
                             value="${propertynode._techname} - ${propertynode.description[:30]}">
                 </datalist>
             </div>
@@ -68,12 +69,24 @@
         </div>
         <div>&nbsp;</div>
         <div>
+            Apply property schema<br>
+            <label for="applyschema" class="uk-form-label">Schema</label>
+            <div class="uk-form-controls">
+                <select name="applyschema" id="applyschema" class="uk-select">
+                    <option value=""></option>
+                    <option tal:repeat="schemanode db.schemahandler.schemanodes"
+                                value="${schemanode._schemaname}">${schemanode._schemaname} - ${schemanode.description}</option>
+                </select>
+            </div>
+        </div>
+        <div>&nbsp;</div>
+        <div>
 <!--?            <input type="submit" value="save" class="uk-input">Save</input>-->
             <button class="uk-button uk-button-primary">Save</button>
             <div>&nbsp;</div>
             <div class="uk-text-right"><a class="uk-button uk-button-danger"
                href="/delete_node/${node.id}"
-               onclick="delete_node('${node.id}'); return false;">Delete</a></div>
+               onclick="delete_node('${node.id}'); return false;">Delete node</a></div>
         </div>
         <hr>
         <div>&nbsp;</div>

@@ -84,6 +84,9 @@ def edit_obj(obj,request,excluded=['_id']):
     for k in ['name','value','type']:
         name = 'newprop_'+k
         setattr(MyForm,name,StringField(name))
+
+    MyForm.applyschema=StringField('applyschema') # 00_todo replace by proper string field
+
     form = MyForm(request.form)
     if form.validate():
         keys = list(obj.keys())
@@ -96,13 +99,21 @@ def edit_obj(obj,request,excluded=['_id']):
 
             obj[k]=form[k].data
         obj.labels = set([l.strip() for l in form.labels.data.split(':')])
-        if form.newprop_name.data and form.newprop_value.data and form.newprop_type.data:
+
+        if form.newprop_name.data and form.newprop_type.data:
             typemap = dict(string=str,integer=int, int=int)
             newtype = typemap.get(form.newprop_type.data,str)
-            value = newtype(form.newprop_value.data)
+            value = newtype(form.newprop_value.data) or ''
             name = form.newprop_name.data
+            if ' - ' in name:
+                name = name.split(' - ')[0].strip()
             if name not in excluded:
                 obj[name]=value
+
+        if form.applyschema.data:
+            db.schemahandler.apply_to_node(form.applyschema.data,obj)
+
+
         return True
     else:
         return False
