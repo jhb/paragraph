@@ -47,7 +47,9 @@ class NeoGraphDB:
             print(f'{statement} {kwargs}')  # 00_todo
             if self.debug==2:
                 self.debug=0
-        return tx.run(statement, **kwargs)
+        result =  tx.run(statement, **kwargs)
+        result.detach()
+        return result
 
     def _neo2node(self, neonode):
         nodeid = neonode['_id']
