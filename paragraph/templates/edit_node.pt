@@ -41,12 +41,22 @@
         <div>
             New Property<br/>
             <label for="_newprop_name" class="uk-form-label">name</label>
-            <div class="uk-form-controls"><input name="newprop_name" id="_newprop_name" value="" class="uk-input"></div>
+            <div class="uk-form-controls">
+                <input name="newprop_name" id="_newprop_name" value="" class="uk-input" list="propertynames" autocomplete="off">
+                <datalist id="propertynames">
+                    <option tal:repeat="propertynode sorted(db.query_nodes('_Property').nodes,key=lambda x: x._techname)"
+                            value="${propertynode._techname} - ${propertynode.description[:30]}">
+                </datalist>
+            </div>
         </div>
 
         <div>
             <label for="_newprop_value" class="uk-form-label">value</label>
-            <div class="uk-form-controls"><input name="newprop_value" id="_newprop_value" value="" class="uk-input"></div>
+            <div class="uk-form-controls">
+                <input name="newprop_value" id="_newprop_value" value="" class="uk-input" list="languages">
+
+
+            </div>
         </div>
 
         <div>

@@ -77,6 +77,17 @@ class SimpleTraverser(ResultWrapper):
     def allnodes(self):
         return SimpleTraverser(self.g, set(self.nodes) | set(self.nodes_seen),prev=self)
 
+    def store(self,**kwargs):
+        rows = []
+        for node in self.nodes:
+            data = {}
+            for k,v in kwargs.items():
+                data[k] = node.get(v,None)
+            rows.append(data)
+        out = SimpleTraverser(self.g, self.nodes, prev=self)
+        out.rows = rows
+        return out
+
 
 
 

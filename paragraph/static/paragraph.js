@@ -29,6 +29,7 @@ var start_3d = function () {
     var em = div.offsetHeight;
 
     var myGraph = ForceGraph3D({controlType: 'orbit'});
+    //var myGraph = ForceGraph3D();
     var canvas = document.getElementById('3d-graph');
     var data = JSON.parse($('#3d-graph-data').text());
 
