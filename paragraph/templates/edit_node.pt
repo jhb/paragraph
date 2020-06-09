@@ -33,7 +33,7 @@
                 ${key}
 
             </label>
-            <div class="uk-form-controls"><input name="${key}" id="${key}" value="${value}" class="uk-input uk-form-blank"></div>
+            <div class="uk-form-controls"><input name="formdata_${key}" id="${key}" value="${value}" class="uk-input uk-form-blank"></div>
         </div>
         <div class="uk-text-muted">^ delete</div>
         <div>&nbsp;</div>

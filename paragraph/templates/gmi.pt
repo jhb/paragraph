@@ -104,7 +104,7 @@ print(result.rows[0]['n'].oN().nodes)
                     <div>&nbsp;</div>
                      <div class="mermaid" tal:condition="result.nodes or result.edges">
                       graph TD
-                         <span tal:omit-tag="" tal:repeat="node result.allnodes().nodes">n${node.id}(${sorted(list(node.labels))[0]} <br/>${node.dn()})</span>
+                         <span tal:omit-tag="" tal:repeat="node result.allnodes().nodes">n${node.id}(${node.labels and sorted(list(node.labels))[0] or 'Node'} <br/>${node.dn()})</span>
                          <span tal:omit-tag="" tal:repeat="edge result.edges">n${edge.source.id}-- ${edge.reltype}-->n${edge.target.id}</span>
                          <span tal:omit-tag="" tal:repeat="node result.allnodes().nodes">click n${node.id} node_callback</span>
                       </div>

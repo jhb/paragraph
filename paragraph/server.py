@@ -80,7 +80,7 @@ def edit_obj(obj,request,excluded=['_id']):
             continue
         vt = type(v)
         if vt is str or 1:
-            setattr(MyForm,k,StringField(k))
+            setattr(MyForm,'formdata_'+k,StringField('formdata_'+k))
     for k in ['name','value','type']:
         name = 'newprop_'+k
         setattr(MyForm,name,StringField(name))
@@ -97,8 +97,8 @@ def edit_obj(obj,request,excluded=['_id']):
             if k in excluded:
                 continue
 
-            obj[k]=form[k].data
-        obj.labels = set([l.strip() for l in form.labels.data.split(':')])
+            obj[k]=form['formdata_'+k].data
+        obj.labels = set([l.strip() for l in form.labels.data.split(':') if l])
 
         if form.newprop_name.data and form.newprop_type.data:
             typemap = dict(string=str,integer=int, int=int)
