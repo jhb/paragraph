@@ -3,11 +3,12 @@
                                   nodelink gmi_template.macros.nodelink;
                                   edgelinka gmi_template.macros.edgelinka;">
     <div class="uk-h3">Node ${node.id[:6]}
-        <div class="uk-text-meta">Schemata: ${', '.join([s['_schemaname'] for s in db.schemahandler.find_schemata(node)])}</div>
+        <div class="uk-text-meta">Schemata: ${', '.join(sorted([s['_schemaname'] for s in db.schemahandler.find_schemata(node)]))}</div>
     </div>
     <form class="uk-form-horizontal" id="edit-form" action="${flask.url_for('edit_node',node_id=node.id)}">
         <div>
-            <label for="_id" class="uk-form-label"><span class="spacer"></span>id</label>
+            <label for="_id" class="uk-form-label"
+                   title="uuid of an object"><span class="spacer"></span>id</label>
             <div class="uk-form-controls">
                 <input id="_id" disabled value="${node.id}" class="uk-input uk-form-blank">
             </div>
@@ -19,21 +20,29 @@
                 labels
             </label>
 
-            <div class="uk-form-controls"><input name="labels" id="labels" value="${':'.join(sorted(list(node.labels)))}"
-                      class="uk-input uk-form-blank"/>
+            <div class="uk-form-controls">
+                <input name="labels" id="labels" value="${':'.join(sorted(list(node.labels)))}"
+                       class="uk-input uk-form-blank"/>
             </div>
             
         </div>
 
         <div tal:repeat="(key,value) [(k,v) for k,v in sorted(node.items()) if k!='_id']">
-            <label for="${key}" class="uk-form-label">
+            <label for="${key}"
+                   class="uk-form-label"
+                   title="${db.schemahandler.property_description(key) or 'bla'}">
                 <span class="delete-checkbox">
                     <input type="checkbox" class="uk-checkbox" name="_delete_${key}">
                 </span>
                 ${key}
 
             </label>
-            <div class="uk-form-controls"><input name="formdata_${key}" id="${key}" value="${value}" class="uk-input uk-form-blank"></div>
+            <div class="uk-form-controls">
+                <input name="formdata_${key}"
+                       id="${key}"
+                       value="${value}"
+                       class="uk-input uk-form-blank">
+            </div>
         </div>
         <div class="uk-text-muted">^ delete</div>
         <div>&nbsp;</div>
@@ -46,7 +55,7 @@
                 <input name="newprop_name" id="_newprop_name" value="" class="uk-input" list="propertynames" autocomplete="off">
                 <datalist id="propertynames">
                     <option tal:repeat="propertynode db.schemahandler.propertynodes"
-                            value="${propertynode._techname} - ${propertynode.description[:30]}">
+                            value="${propertynode._techname} - ${propertynode.description[:60]}">
                 </datalist>
             </div>
         </div>
