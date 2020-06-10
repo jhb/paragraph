@@ -93,13 +93,13 @@ class NeoGraphDB:
             properties['_id'] = self._new_uid()
         if type(labels) != set:
             labels = set()
-        signals.before_label_store.send(self, labels=labels)
+        signals.before_label_store.send(self, labels=labels,properties=properties)
         labelstring = self._labels2string(labels)
         result = self._run(f'create (n{labelstring}) set n = $props return n', props=properties)
         return self._neo2node(result.single()['n'])
 
     def update_node(self, node: Node):
-        signals.before_label_store.send(self,labels=node.labels)
+        signals.before_label_store.send(self,labels=node.labels, properties=node)
         labelstring = self._labels2string(node.labels)
         if labelstring:
             labelstring = 'set n' + labelstring

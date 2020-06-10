@@ -46,17 +46,18 @@ class Schemahandler:
                 return p['description']
         return ''
 
-    def filter_labels(self, labels :set):
-        schemanames = set([n for n in self.schemanames if not n.startswith('_')])
+    def filter_labels(self, labels :set, properties: dict):
+        schemanames = set(self.schemanames)
         to_remove = schemanames & labels
         for label in to_remove:
             labels.remove(label)
+        labels.update([s['_schemaname'] for s in self.find_schemata(properties)])
         return labels
 
 @signals.before_label_store.connect
-def filter_schema_labels(db,labels :set):
+def filter_schema_labels(db,labels :set, properties : dict):
     sh = Schemahandler(db)
-    sh.filter_labels(labels)
+    sh.filter_labels(labels, properties)
 
 # node.labels[] = set(node.userlabels) | set(node.schemata) Sekunde, batterie alle
 # schema definieren namensraum für labels, der nicht durch Nutzer vergeben werden kann.
