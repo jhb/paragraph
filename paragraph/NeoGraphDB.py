@@ -8,6 +8,7 @@ import neo4j
 from paragraph.basic import GraphDB, Node, Edge, ResultWrapper
 from paragraph.schemahandler import Schemahandler
 from paragraph.simpletraverser import SimpleTraverser
+from paragraph import signals
 
 
 # 00_todo: uses labels and types for filters
@@ -90,11 +91,15 @@ class NeoGraphDB:
     def add_node(self, *labels, **properties):
         if '_id' not in properties:
             properties['_id'] = self._new_uid()
+        if type(labels) != set:
+            labels = set()
+        signals.before_label_store.send(self, labels=labels)
         labelstring = self._labels2string(labels)
         result = self._run(f'create (n{labelstring}) set n = $props return n', props=properties)
         return self._neo2node(result.single()['n'])
 
     def update_node(self, node: Node):
+        signals.before_label_store.send(self,labels=node.labels)
         labelstring = self._labels2string(node.labels)
         if labelstring:
             labelstring = 'set n' + labelstring
