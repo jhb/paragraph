@@ -47,7 +47,7 @@ class Schemahandler:
         return ''
 
     def filter_labels(self, labels :set):
-        schemanames = set(self.schemanames)
+        schemanames = set([n for n in self.schemanames if not n.startswith('_')])
         to_remove = schemanames & labels
         for label in to_remove:
             labels.remove(label)
