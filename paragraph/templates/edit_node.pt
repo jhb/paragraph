@@ -2,37 +2,47 @@
 <body tal:omit-tag="" tal:define="gmi_template load:./gmi.pt;
                                   nodelink gmi_template.macros.nodelink;
                                   edgelinka gmi_template.macros.edgelinka;">
-    <h2>Node ${node.id[:6]}</h2>
+    <div class="uk-h3">Node ${node.id[:6]}
+        <div class="uk-text-meta">Schemata: ${', '.join(sorted([s['_schemaname'] for s in db.schemahandler.find_schemata(node)]))}</div>
+    </div>
     <form class="uk-form-horizontal" id="edit-form" action="${flask.url_for('edit_node',node_id=node.id)}">
         <div>
-            <label for="_id" class="uk-form-label"><span class="spacer"></span>id</label>
+            <label for="_id" class="uk-form-label"
+                   title="uuid of an object"><span class="spacer"></span>id</label>
             <div class="uk-form-controls">
                 <input id="_id" disabled value="${node.id}" class="uk-input uk-form-blank">
             </div>
         </div>
         <div>&nbsp;</div>
-
         <div>
             <label for="labels" class="uk-form-label" title="Comma seperated labels">
                 <span class="spacer"></span>
                 labels
             </label>
 
-            <div class="uk-form-controls"><input name="labels" id="labels" value="${', '.join(sorted(list(node.labels)))}"
-                      class="uk-input uk-form-blank"/>
+            <div class="uk-form-controls">
+                <input name="labels" id="labels" value="${':'.join(sorted(list(node.labels)))}"
+                       class="uk-input uk-form-blank"/>
             </div>
             
         </div>
 
         <div tal:repeat="(key,value) [(k,v) for k,v in sorted(node.items()) if k!='_id']">
-            <label for="${key}" class="uk-form-label">
+            <label for="${key}"
+                   class="uk-form-label"
+                   title="${db.schemahandler.property_description(key) or 'bla'}">
                 <span class="delete-checkbox">
                     <input type="checkbox" class="uk-checkbox" name="_delete_${key}">
                 </span>
                 ${key}
 
             </label>
-            <div class="uk-form-controls"><input name="${key}" id="${key}" value="${value}" class="uk-input uk-form-blank"></div>
+            <div class="uk-form-controls">
+                <input name="formdata_${key}"
+                       id="${key}"
+                       value="${value}"
+                       class="uk-input uk-form-blank">
+            </div>
         </div>
         <div class="uk-text-muted">^ delete</div>
         <div>&nbsp;</div>
@@ -41,12 +51,22 @@
         <div>
             New Property<br/>
             <label for="_newprop_name" class="uk-form-label">name</label>
-            <div class="uk-form-controls"><input name="newprop_name" id="_newprop_name" value="" class="uk-input"></div>
+            <div class="uk-form-controls">
+                <input name="newprop_name" id="_newprop_name" value="" class="uk-input" list="propertynames" autocomplete="off">
+                <datalist id="propertynames">
+                    <option tal:repeat="propertynode db.schemahandler.propertynodes"
+                            value="${propertynode._techname} - ${propertynode.description[:60]}">
+                </datalist>
+            </div>
         </div>
 
         <div>
             <label for="_newprop_value" class="uk-form-label">value</label>
-            <div class="uk-form-controls"><input name="newprop_value" id="_newprop_value" value="" class="uk-input"></div>
+            <div class="uk-form-controls">
+                <input name="newprop_value" id="_newprop_value" value="" class="uk-input" list="languages">
+
+
+            </div>
         </div>
 
         <div>
@@ -58,12 +78,24 @@
         </div>
         <div>&nbsp;</div>
         <div>
+            Apply property schema<br>
+            <label for="applyschema" class="uk-form-label">Schema</label>
+            <div class="uk-form-controls">
+                <select name="applyschema" id="applyschema" class="uk-select">
+                    <option value=""></option>
+                    <option tal:repeat="schemanode db.schemahandler.schemanodes"
+                                value="${schemanode._schemaname}">${schemanode._schemaname} - ${schemanode.description}</option>
+                </select>
+            </div>
+        </div>
+        <div>&nbsp;</div>
+        <div>
 <!--?            <input type="submit" value="save" class="uk-input">Save</input>-->
             <button class="uk-button uk-button-primary">Save</button>
             <div>&nbsp;</div>
             <div class="uk-text-right"><a class="uk-button uk-button-danger"
                href="/delete_node/${node.id}"
-               onclick="delete_node('${node.id}'); return false;">Delete</a></div>
+               onclick="delete_node('${node.id}'); return false;">Delete node</a></div>
         </div>
         <hr>
         <div>&nbsp;</div>

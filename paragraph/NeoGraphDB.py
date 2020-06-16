@@ -6,7 +6,9 @@ from neo4j import GraphDatabase, BoltStatementResult
 import neo4j
 
 from paragraph.basic import GraphDB, Node, Edge, ResultWrapper
+from paragraph.schemahandler import Schemahandler
 from paragraph.simpletraverser import SimpleTraverser
+from paragraph import signals
 
 
 # 00_todo: uses labels and types for filters
@@ -46,7 +48,9 @@ class NeoGraphDB:
             print(f'{statement} {kwargs}')  # 00_todo
             if self.debug==2:
                 self.debug=0
-        return tx.run(statement, **kwargs)
+        result =  tx.run(statement, **kwargs)
+        result.detach()
+        return result
 
     def _neo2node(self, neonode):
         nodeid = neonode['_id']
@@ -87,11 +91,15 @@ class NeoGraphDB:
     def add_node(self, *labels, **properties):
         if '_id' not in properties:
             properties['_id'] = self._new_uid()
+        if type(labels) != set:
+            labels = set()
+        signals.before_label_store.send(self, labels=labels,properties=properties)
         labelstring = self._labels2string(labels)
         result = self._run(f'create (n{labelstring}) set n = $props return n', props=properties)
         return self._neo2node(result.single()['n'])
 
     def update_node(self, node: Node):
+        signals.before_label_store.send(self,labels=node.labels, properties=node)
         labelstring = self._labels2string(node.labels)
         if labelstring:
             labelstring = 'set n' + labelstring
@@ -108,9 +116,10 @@ class NeoGraphDB:
             result = self._run("match (n) where n._id=$_id delete n", _id=_id)
 
     def query_nodes(self, *labels, **filters):
+        labelstring = self._labels2string(labels)
         result = self._run('''WITH $filters as filters 
-                              MATCH (n) WHERE ALL(k in keys(filters) WHERE filters[k] = n[k])
-                              return n''',
+                              MATCH (n%s) WHERE ALL(k in keys(filters) WHERE filters[k] = n[k])
+                              return n''' % labelstring,
                            filters=filters)
         #return Neo4jWrapper([self._neo2node(r['n']) for r in result],self)
         return Neo4jWrapper(result,self)
@@ -191,12 +200,17 @@ class NeoGraphDB:
         result = self._run(statement,**params)
         return Neo4jWrapper(result, self)
 
-    def traverse(self, nodes=None, **filters):
+    def traverse(self, nodes=None, labels=None,  **filters):
+        if labels is None:
+            labels = []
+        elif type(labels) is str:
+            labels = [labels]
         if nodes:
             if type(nodes) != list:
                 nodes = [nodes]
         else:
-            nodes = self.query_nodes(**filters).nodes
+            nodes = self.query_nodes(*labels, **filters).nodes
+
         return SimpleTraverser(self, nodes)
 
     def _recursive_replace(self,object):
@@ -215,6 +229,9 @@ class NeoGraphDB:
     def _fix_ids(self):
         pass
 
+    @property
+    def schemahandler(self):
+        return Schemahandler(self)
 
 class Neo4jWrapper(ResultWrapper):
 

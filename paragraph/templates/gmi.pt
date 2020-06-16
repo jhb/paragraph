@@ -51,7 +51,7 @@ print(result.rows[0]['n'].oN().nodes)
                        class="node${node.id}"
                        title="Node ${node.id}">
                         <span tal:omit-tag=""
-                              metal:define-macro="nodelinktext">${node.labels and ', '.join(sorted(list(node.labels))) or 'Node'} ${node.dn()}</span></a>
+                              metal:define-macro="nodelinktext">${node.dn()} :${node.labels and ':'.join(sorted(list(node.labels))) or 'Node'}</span></a>
                 </span>
                 <span metal:define-macro="edgelink">
                     <span tal:define="node edge.source" metal:use-macro="macros.nodelink" tal:omit-tag="">nodeA</span>
@@ -69,12 +69,12 @@ print(result.rows[0]['n'].oN().nodes)
             </span>
 
             <div>&nbsp</div>
-            <ul class="uk-subnav" uk-tab>
-                <li><a href="#">List</a></li>
-                <li><a href="#">Graph</a></li>
-                <li><a href="#">3D</a></li>
-                <li><a href="#">Table</a></li>
-                <li><a href="#">Printed</a></li>
+            <ul class="uk-subnav" uk-tab id="tabs">
+                <li><a href="#"  onClick="Cookies.set('showtab',0);">List</a></li>
+                <li><a href="#"  onClick="Cookies.set('showtab',1);">Graph</a></li>
+                <li><a href="#"  onClick="Cookies.set('showtab',2);">3D</a></li>
+                <li><a href="#"  onClick="Cookies.set('showtab',3);">Table</a></li>
+                <li><a href="#"  onClick="Cookies.set('showtab',4);">Printed</a></li>
             </ul>
             <div class="uk-switcher">
 
@@ -99,12 +99,12 @@ print(result.rows[0]['n'].oN().nodes)
                     </div>
                 </div>
 
-                 <div onshow="mermaid.init({securityLevel:'loose'},'.mermaid')">
+                 <div onshow="mermaid.init({securityLevel:'loose'},'.mermaid');">
                     <div><b>Graph</b></div>
                     <div>&nbsp;</div>
                      <div class="mermaid" tal:condition="result.nodes or result.edges">
                       graph TD
-                         <span tal:omit-tag="" tal:repeat="node result.allnodes().nodes">n${node.id}(${', '.join(list(node.labels))} <br/>${node.get("name",node.id[:6])})</span>
+                         <span tal:omit-tag="" tal:repeat="node result.allnodes().nodes">n${node.id}(${node.labels and sorted(list(node.labels))[0] or 'Node'} <br/>${node.dn()})</span>
                          <span tal:omit-tag="" tal:repeat="edge result.edges">n${edge.source.id}-- ${edge.reltype}-->n${edge.target.id}</span>
                          <span tal:omit-tag="" tal:repeat="node result.allnodes().nodes">click n${node.id} node_callback</span>
                       </div>
@@ -193,7 +193,13 @@ print(result.rows[0]['n'].oN().nodes)
 
             }
 
-            $(start_3d());
+
+
+            $(function() {
+                start_3d();
+                UIkit.tab('#tabs').show(Cookies.get('showtab')||0);
+            });
+
         </script>
             </span>
 </span>
