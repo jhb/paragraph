@@ -15,6 +15,7 @@ import neo4j
 from paragraph.tal_templates import TalTemplates
 from flask_wtf import FlaskForm
 from wtforms import Form,StringField
+from paragraph.execute import run_script
 
 app = Flask(__name__)
 # turn of caching for static files during development
@@ -33,37 +34,16 @@ def hello_world():
 def gmi():
     result =None
     if request.values:
-        print(request.values.get('statement'))
-        printed = StringIO()
-        vars = ObjectDict(printed=printed, db=db,result=None, SimpleTraverser=SimpleTraverser)
-        stdout = sys.stdout
-        request.stdout = stdout
-        try:
-            sys.stdout = printed
-            exec(request.values.get('statement', ''), vars)
-            result = vars.get('result', None)
-            sys.stdout = stdout
-            printvalue = printed.getvalue()
-            db.rollback()
-        except Exception as e:
-            sys.stdout=stdout
-            exinfo = sys.exc_info()
-            top = exinfo[2]
-            line = '?? - see below'
-            if top.tb_next:
-                top = exinfo[2].tb_next
-                line = top.tb_lineno
-            printvalue = printed.getvalue()
-            printvalue += """\n== Error on input line %s ==\n%s: %s\n \n%s""" %(line,
-                                                                                e.__class__.__name__,
-                                                                                str(e),
-                                                                                traceback.format_exc())
-        finally:
-            sys.stdout=stdout
+        statement = request.values.get('statement', '')
+        print(statement)
+        vars = ObjectDict(db=db, result=None, SimpleTraverser=SimpleTraverser)
+        result, printvalue = run_script(statement, vars)
     else:
         printvalue = ''
+
     if not isinstance(result, ResultWrapper):
         result = ResultWrapper(result)
+
     return templates.gmi(db=db,result=result, printvalue=printvalue)
 
 @app.route('/show_node/<string:node_id>')
