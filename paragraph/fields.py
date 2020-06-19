@@ -1,9 +1,21 @@
+import sys
+import inspect
+import json
+
+import yaml
+
+
 class Field:
 
     dbtype = 'string'
 
     def _default(self):
         return ''
+
+    def possible_widgets(self):
+        clsmembers = [i[1] for i in inspect.getmembers(sys.modules[__name__], inspect.isclass)]
+        myclass = self.__class__
+        return [cls for cls in clsmembers if myclass in getattr(cls,'possible_fields',[])]
 
     def __init__(self, value=None):
         if value is None:
@@ -27,7 +39,6 @@ class Field:
         return self.value
 
 
-
 class StringField(Field):
     pass
 
@@ -43,9 +54,47 @@ class ListField(Field):
         self.value = value.split('|||')
         return self.value
 
+class JsonOrStringField(Field):
+
+    def __str__(self):
+        return self.to_db()
+
+    def to_db(self):
+        if type(self.value) == str:
+            return self.value
+        else:
+            out = json.dumps(self.value, indent=2)
+            #print(out)
+            return out
+
+    def from_db(self, value):
+        try:
+            v = json.loads(value)
+        except json.decoder.JSONDecodeError as e:
+            v = value
+        self.value = v
+        return self.value
+
+class YamlField(Field):
+
+    def __str__(self):
+        return self.to_db()
+
+    def to_db(self):
+        return yaml.safe_dump(self.value)
+
+    def from_db(self, value):
+        self.value = yaml.safe_load(value)
+        return self.value
+
+
+
+
 
 
 class Widget:
+
+    possible_fields = [StringField]
 
     def __init__(self,field):
         self.field = field
@@ -57,10 +106,18 @@ class Widget:
         kwargs['value']=str(self.field)
         return f'<input {self._kw2attr(**kwargs)}/>'
 
+    def view(self, _tag='span', **kwargs):
+        return self.html(_tag, **kwargs)
+
     def html(self, _tag='span', **kwargs):
-        return f"<{_tag} {self._kw2attr(**kwargs)}>{self.field.value}</{_tag}>"
+        return f"<{_tag} {self._kw2attr(**kwargs)}>{str(self.field.value)}</{_tag}>"
+
+class StringWidget(Widget):
+    possible_fields = [StringField]
 
 class LinesWidget(Widget):
+
+    possible_fields = [ListField]
 
     def edit(self,**kwargs):
         return "<textarea %s>%s</textarea>" % (self._kw2attr(**kwargs),
@@ -70,17 +127,39 @@ class LinesWidget(Widget):
 
 class ListWidget(LinesWidget):
 
+    possible_fields = [ListField]
+
     def html(self,  _tag='ol',**kwargs):
         data = '\n'.join([f'<li>{v}</li>' for v in self.field.value])
         return f"<{_tag} {self._kw2attr(**kwargs)}>{data}</{_tag}>"
 
-class HTMlWidget(Widget):
 
-    def edit(self,**kwargs): #use some wysiwyg editor for this, or md
+class TextWidget(Widget):
+
+    possible_fields = [StringField, JsonOrStringField, YamlField]
+
+    def edit(self,**kwargs):
         return "<textarea %s>%s</textarea>" % (self._kw2attr(**kwargs),
-                                               self.field.value)
+                                               str(self.field))
+
+class HTMlWidget(TextWidget):
+    possible_fields = [StringField]
+
+    # #use some wysiwyg editor for edit, or md
 
     def html(self, _tag='div', **kwargs):
         return super().html(_tag,**kwargs)
 
 
+def all_combos():
+    combos = []
+    clsmembers = inspect.getmembers(sys.modules[__name__], inspect.isclass)
+    for name, widget in clsmembers:
+        if not issubclass(widget,Widget) or widget == Widget:
+            continue
+        wname = widget.__name__
+        for field in widget.possible_fields:
+            fname = field.__name__
+            name = f' {wname} with {fname}'
+            combos.append(name)
+    return sorted(combos)

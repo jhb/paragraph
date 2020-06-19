@@ -8,6 +8,10 @@ def test_Field():
     f.from_db('24')
     assert int(f) == 24
 
+def test_Field_possible_widgets():
+    f = fields.ListField()
+    possible = f.possible_widgets()
+    assert set(possible) == {fields.ListWidget,fields.LinesWidget}
 
 def test_StringField():
 
@@ -24,6 +28,38 @@ def test_ListField():
     f3.from_db(serialized)
     assert f3.value == mylist
 
+def test_JsonOrStringField():
+    data = ['a','b','c']
+    f1 = fields.JsonOrStringField(data)
+    serialized = f1.to_db()
+    assert serialized == '["a", "b", "c"]'
+    f2 = fields.JsonOrStringField()
+    f2.from_db(serialized)
+    assert f2.value == data
+    f3 = fields.JsonOrStringField('foo')
+    serialized = f3.to_db()
+    assert serialized == 'foo'
+    f4 = fields.JsonOrStringField()
+    f4.from_db(serialized)
+    assert f4.value == 'foo'
+
+def test_YamlField():
+    data = ['a','b','c']
+    f1 = fields.YamlField(data)
+    serialized = f1.to_db()
+    assert serialized == '- a\n- b\n- c\n'
+    f2 = fields.YamlField()
+    f2.from_db(serialized)
+    assert f2.value == data
+    f3 = fields.YamlField('foo')
+    serialized = f3.to_db()
+    assert serialized == 'foo\n...\n'
+    f4 = fields.YamlField()
+    f4.from_db(serialized)
+    assert f4.value == 'foo'
+
+
+
 def test_ListWidget():
     data = ['a','b','c']
     f = fields.ListField(data)
@@ -37,3 +73,11 @@ def test_HTMLWidget():
     lh = fields.HTMlWidget(f)
     assert lh.edit(name='bla') == '<textarea name="bla"><h1>Testheading</h1></textarea>'
     assert lh.html(name='bla') == '<div name="bla"><h1>Testheading</h1></div>'
+
+def test_combos():
+    print(fields.all_combos())
+
+def test_jhb():
+    f = fields.JsonOrStringField(['a','b','c',['x%s'  % i  for i in range(5)],dict(foo=1,bar=2)])
+    w = fields.TextWidget(f)
+    print(w.edit())
