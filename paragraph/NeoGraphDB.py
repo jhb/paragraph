@@ -92,7 +92,7 @@ class NeoGraphDB:
         if '_id' not in properties:
             properties['_id'] = self._new_uid()
         if type(labels) != set:
-            labels = set()
+            labels = set(labels)
         signals.before_label_store.send(self, labels=labels,properties=properties)
         labelstring = self._labels2string(labels)
         result = self._run(f'create (n{labelstring}) set n = $props return n', props=properties)
