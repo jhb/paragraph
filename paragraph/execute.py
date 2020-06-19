@@ -1,16 +1,14 @@
 import sys
 from io import StringIO
-from flask import request
 import traceback
+from paragraph.basic import ObjectDict
 
 
-def run_script(code,vars=None):
-    if vars is None:
-        vars = {}
+def run_script(code,**kwargs):
     printed = StringIO()
+    vars = ObjectDict(kwargs)
     vars['printed'] = printed
     stdout = sys.stdout
-    request.stdout = stdout
     result = None
     try:
         sys.stdout = printed

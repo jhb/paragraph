@@ -32,7 +32,7 @@ def test_JsonOrStringField():
     data = ['a','b','c']
     f1 = fields.JsonOrStringField(data)
     serialized = f1.to_db()
-    assert serialized == '["a", "b", "c"]'
+    assert serialized == '[\n  "a",\n  "b",\n  "c"\n]'
     f2 = fields.JsonOrStringField()
     f2.from_db(serialized)
     assert f2.value == data
@@ -58,7 +58,18 @@ def test_YamlField():
     f4.from_db(serialized)
     assert f4.value == 'foo'
 
-
+def test_ScriptField(ld):
+    script = "result='hello '+ 'world'"
+    f = fields.ScriptField(script)
+    assert f.value == script
+    assert str(f) == 'hello world'
+    script2 = 'print(foobar)'
+    f2 = fields.ScriptField(script2)
+    assert "== Error on input line 1 ==" in str(f2)
+    script3 = "result=db.query_nodes(name='alice')"
+    f3 = fields.ScriptField(script3,db=ld.db)
+    result = f3.get_value()
+    assert result.nodes[0] == ld.alice
 
 def test_ListWidget():
     data = ['a','b','c']

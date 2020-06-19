@@ -36,8 +36,7 @@ def gmi():
     if request.values:
         statement = request.values.get('statement', '')
         print(statement)
-        vars = ObjectDict(db=db, result=None, SimpleTraverser=SimpleTraverser)
-        result, printvalue = run_script(statement, vars)
+        result, printvalue = run_script(statement, db=db, result=None, SimpleTraverser=SimpleTraverser)
     else:
         printvalue = ''
 

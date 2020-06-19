@@ -4,6 +4,8 @@ import json
 
 import yaml
 
+from paragraph.execute import run_script
+
 
 class Field:
 
@@ -17,19 +19,23 @@ class Field:
         myclass = self.__class__
         return [cls for cls in clsmembers if myclass in getattr(cls,'possible_fields',[])]
 
-    def __init__(self, value=None):
+    def __init__(self, value=None, **kwargs):
         if value is None:
             value = self._default()
         self.value = value
+        self.kwargs=kwargs
+
+    def get_value(self):
+        return self.value
 
     def __str__(self):
-        return str(self.value)
+        return str(self.get_value())
 
     def __int__(self):
-        return int(self.value)
+        return int(self.get_value())
 
     def __float__(self):
-        return float(self.value)
+        return float(self.get_value())
 
     def to_db(self):
         return str(self)
@@ -87,7 +93,14 @@ class YamlField(Field):
         self.value = yaml.safe_load(value)
         return self.value
 
+class ScriptField(Field):
 
+    def get_value(self):
+        result, printvalue = run_script(self.value,**self.kwargs)
+        if result:
+            return result
+        else:
+            return printvalue
 
 
 
@@ -136,7 +149,7 @@ class ListWidget(LinesWidget):
 
 class TextWidget(Widget):
 
-    possible_fields = [StringField, JsonOrStringField, YamlField]
+    possible_fields = [StringField, JsonOrStringField, YamlField, ScriptField]
 
     def edit(self,**kwargs):
         return "<textarea %s>%s</textarea>" % (self._kw2attr(**kwargs),
