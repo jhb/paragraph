@@ -72,8 +72,9 @@
         <div>
             <label for="_newprop_type" class="uk-form-label">type</label>
             <div class="uk-form-controls"><select name="newprop_type" id="_newprop_type" class="uk-select">
-                <option value="string">string</option>
-                <option value="int">integer</option>
+                <option tal:repeat="typename sorted(typemap.keys())"
+                        tal:attributes="selected typename=='string'"
+                        value="${typename}">${typename}</option>
             </select></div>
         </div>
         <div>&nbsp;</div>

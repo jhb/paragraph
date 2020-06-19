@@ -173,6 +173,6 @@ def all_combos():
         wname = widget.__name__
         for field in widget.possible_fields:
             fname = field.__name__
-            name = f' {wname} with {fname}'
+            name = f' {fname} with {wname}'
             combos.append(name)
     return sorted(combos)

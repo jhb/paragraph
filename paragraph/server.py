@@ -1,6 +1,9 @@
 import abc
 from collections import UserList, OrderedDict, UserDict
 import mimetypes
+
+from paragraph import fields
+
 mimetypes.add_type('text/css', '.css')
 mimetypes.add_type('text/javascript', '.js')
 
@@ -23,6 +26,8 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 templates = TalTemplates()
 db = NeoGraphDB(debug=0)
+
+typemap = dict(string=str,integer=int, boolean='bool')
 
 @app.route('/')
 def hello_world():
@@ -80,7 +85,7 @@ def edit_obj(obj,request,excluded=['_id']):
         obj.labels = set([l.strip() for l in form.labels.data.split(':') if l])
 
         if form.newprop_name.data and form.newprop_type.data:
-            typemap = dict(string=str,integer=int, int=int)
+            # get type from property, otherwise from typemap
             newtype = typemap.get(form.newprop_type.data,str)
             value = newtype(form.newprop_value.data) or ''
             name = form.newprop_name.data
@@ -106,7 +111,7 @@ def edit_node(node_id):
         if validated:
             node = db.update_node(node)
             db.commit()
-    return templates.edit_node(db=db,node=node)
+    return templates.edit_node(db=db,node=node,typemap=typemap)
 
 @app.route('/edit_edge/<string:edge_id>', methods=['GET','POST'])
 def edit_edge(edge_id):
@@ -116,7 +121,7 @@ def edit_edge(edge_id):
         if validated:
             edge = db.update_edge(edge)
             db.commit()
-    return templates.edit_edge(db=db,edge=edge)
+    return templates.edit_edge(db=db,edge=edge,typemap=typemap)
 
 @app.route('/add_node')
 def add_node():
