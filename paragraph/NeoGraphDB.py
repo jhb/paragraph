@@ -32,6 +32,12 @@ class NeoGraphDB:
         self.debug = debug
         self._nodecache = {}
         self._edgecache = {}
+        self.propdict = {}
+        self._update_propdict()
+
+
+    def __call__(self,*args,**kwargs):
+        return self.query_nodes(*args,**kwargs)
 
     def begin(self):
         """Begin a transaction
@@ -45,7 +51,7 @@ class NeoGraphDB:
     def _run(self, statement, **kwargs):
         tx = self.begin()
         if self.debug:  #
-            print(f'{statement} {kwargs}')  # 00_todo
+            print(f'{statement} --- {kwargs}')  # 00_todo
             if self.debug==2:
                 self.debug=0
         result =  tx.run(statement, **kwargs)
@@ -92,7 +98,7 @@ class NeoGraphDB:
         if '_id' not in properties:
             properties['_id'] = self._new_uid()
         if type(labels) != set:
-            labels = set()
+            labels = set(labels)
         signals.before_label_store.send(self, labels=labels,properties=properties)
         labelstring = self._labels2string(labels)
         result = self._run(f'create (n{labelstring}) set n = $props return n', props=properties)
@@ -148,8 +154,8 @@ class NeoGraphDB:
             if type(reltypes) not in [list, tuple]:
                 reltypes = [reltypes]
             relstring = ':' + '|'.join(reltypes)
-        for k, v in filters.items():
-            filters[k] = self._nodeid(v)
+        #for k, v in filters.items():
+        #    filters[k] = self._nodeid(v)
         wheres = []
         params = dict(filters=filters)
         if source:
@@ -200,7 +206,7 @@ class NeoGraphDB:
         result = self._run(statement,**params)
         return Neo4jWrapper(result, self)
 
-    def traverse(self, nodes=None, labels=None,  **filters):
+    def traverse(self, labels=None, nodes=None, **filters):
         if labels is None:
             labels = []
         elif type(labels) is str:
@@ -232,6 +238,11 @@ class NeoGraphDB:
     @property
     def schemahandler(self):
         return Schemahandler(self)
+
+    def _update_propdict(self): # 00_maybe better db.propdict? How do we proper cache this?
+        self.propdict = {p['_propname']: p for p in self.schemahandler.propertynodes}
+
+
 
 class Neo4jWrapper(ResultWrapper):
 

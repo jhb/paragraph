@@ -66,6 +66,7 @@ class ObjectDict(dict):
         return '<br>'.join([f'{k} {v}' for k,v in sorted(self.items())])
 
 
+
 class Node(ObjectDict):
 
     def __init__(self, db, *labels, **props):
@@ -88,21 +89,23 @@ class Node(ObjectDict):
         self.update(data)
 
     def oN(self, *reltypes, minhops=1, maxhops=1, ids=False, **filters):
-        return self.db.traverse(self).oN(*reltypes,minhops=minhops,maxhops=maxhops,ids=ids,**filters)
+        return self.db.traverse(nodes=self).oN(*reltypes,minhops=minhops,maxhops=maxhops,ids=ids,**filters)
 
     def iN(self, *reltypes, minhops=1, maxhops=1, ids=False, **filters):
-        return self.db.traverse(self).iN(*reltypes,minhops=minhops,maxhops=maxhops,ids=ids,**filters)
+        return self.db.traverse(nodes=self).iN(*reltypes,minhops=minhops,maxhops=maxhops,ids=ids,**filters)
 
     def __repr__(self):
         return "(%s %s %s)" % (next(iter(self.labels),'Node'),self.id[:6],self.dn())
 
 
     def dn(self):
-        for k in ['_dn','name','title','_schemaname','_techname','id']:
+        for k in ['_dn','name','title','_schemaname','_propname','_reltype','id']:
             if k in self:
                 return self[k]
         return self.id[:6]
 
+    def f(self, key):
+        return self.db.schemahandler.property_field(self,key)
 
 class Edge(ObjectDict):
     def __init__(self, db, source=None, reltype=None, target=None, **props):
@@ -133,6 +136,9 @@ class Edge(ObjectDict):
 
     def __repr__(self):
         return "%s --[%s]--> %s" % (self.source, self.reltype, self.target)
+
+    def f(self, key):
+        return self.db.schemahandler.property_field(self,key)
 
 
 class ResultWrapper:
