@@ -1,10 +1,11 @@
-from paragraph import signals
+from paragraph import signals, fields
 
 class Schemahandler:
 
     def __init__(self,db):
         self.db = db
         self.default_values = dict(string='',int=0)
+        self.propdict = self.db.propdict
 
     @property
     def propertynodes(self):
@@ -27,7 +28,7 @@ class Schemahandler:
         schema = candidates[0]
         node.labels.add(schema['_schemaname'])
         for propertynode in schema.oN('_PROP', _arity='1').nodes:
-            fieldtype = propertynode['_fieldtype']
+            fieldtype = propertynode['_field']
             name = propertynode['_propname']
             if name not in node:
                 node[name]=self.default_values.get(fieldtype,'')
@@ -55,6 +56,25 @@ class Schemahandler:
             labels.remove(label)
         labels.update([s['_schemaname'] for s in self.find_schemata(properties)])
         return labels
+
+    def property_field(self, obj, key, default=fields.StringField):
+        if key in self.propdict:
+            prop = self.propdict[key]
+            fieldclass = getattr(fields,prop['_field'],default)
+            field = fieldclass(obj[key], prop=prop, db=self.db)
+        else:
+            fieldclass = default
+            field = fieldclass(obj[key], prop=None, db=self.db)
+
+        return field
+
+    @property
+    def all_fieldnames(self):
+        return fields.all_fieldnames()
+
+    @property
+    def all_widgetnames(self):
+        return fields.all_widgetnames()
 
 @signals.before_label_store.connect
 def filter_schema_labels(db,labels :set, properties : dict):

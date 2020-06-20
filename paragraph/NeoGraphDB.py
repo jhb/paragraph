@@ -36,7 +36,8 @@ class NeoGraphDB:
         self._update_propdict()
 
 
-
+    def __call__(self,*args,**kwargs):
+        return self.query_nodes(*args,**kwargs)
 
     def begin(self):
         """Begin a transaction

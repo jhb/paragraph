@@ -100,7 +100,7 @@ def edit_obj(obj,request,excluded=['_id']):
 
             #obj[k]=form['formdata_'+k].data
             fieldclass = getPropFieldClass(k)
-            value = fieldclass(form['formdata_'+k].data).get_value()
+            value = fieldclass(form['formdata_'+k].data).value
             obj[k]=value
         obj.labels = set([l.strip() for l in form.labels.data.split(':') if l])
 
@@ -115,13 +115,11 @@ def edit_obj(obj,request,excluded=['_id']):
             if name in propdict:
                 fieldclass = getPropFieldClass(name)
                 f = fieldclass(form.newprop_value.data)
-                value = f.get_value()
+                value = f.value # 00_todo f.get_value, but ScriptFields
                 print('Field',f.__class__)
             else:
                 newtype = typemap.get(form.newprop_type.data,str)
                 value = newtype(form.newprop_value.data) or ''
-
-
 
             if name not in excluded:
                 obj[name]=value
@@ -135,12 +133,13 @@ def edit_obj(obj,request,excluded=['_id']):
 
 
 
-def getWidget(propname, value, defaultfield=fields.StringField, defaultwidget=fields.StringWidget):
+def getWidget(obj, propname, defaultfield=fields.StringField, defaultwidget=fields.StringWidget):
+    value = obj[propname]
     if propname in db.propdict:
         prop = db.propdict[propname]
         fieldclassname = prop.get('_field','')
         fieldclass = getattr(fields, fieldclassname, defaultfield)
-        field = fieldclass(value)
+        field = fieldclass(value,obj=obj, db=db, prop=prop)
         widgetclassname = prop.get('_widget','')
         widgetclass = getattr(fields, widgetclassname, defaultwidget)
         widget = widgetclass(field)

@@ -38,7 +38,7 @@
 
             </label>
             <div class="uk-form-controls"
-                 tal:define="widget getWidget(key,value)">
+                 tal:define="widget getWidget(node,key)">
                 ${structure: widget.edit(id=key,name='formdata_'+key, klass=widget.uik+" uk-form-blank")}
             </div>
         </div>

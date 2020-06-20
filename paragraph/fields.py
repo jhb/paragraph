@@ -103,6 +103,9 @@ class ScriptField(Field):
         else:
             return printvalue
 
+    def to_db(self):
+        return self.value
+
 
 class CSVLineField(Field):
 
@@ -173,7 +176,7 @@ class TextAreaWidget(Widget):
         return "<textarea %s>%s</textarea>" % (self._kw2attr(**kwargs),
                                                str(self.field))
 
-class HTMlWidget(TextAreaWidget):
+class HTMLWidget(TextAreaWidget):
     possible_fields = [StringField]
 
     # #use some wysiwyg editor for edit, or md
@@ -181,6 +184,26 @@ class HTMlWidget(TextAreaWidget):
     def html(self, _tag='div', **kwargs):
         return super().html(_tag,**kwargs)
 
+class ScriptWidget(Widget):
+    possible_fields = [StringField]
+
+    def edit(self, **kwargs):
+        return "<textarea %s>%s</textarea>" % (self._kw2attr(**kwargs),
+                                               self.field.value)
+
+class SelectWidget(Widget):
+    uik = "uk-select"
+    possible_field=[StringField]
+
+    def edit(self, **kwargs):
+        vocab = self.field.kwargs['prop'].f('_vocabulary').get_value() # 00_todo no vocab
+        options = []
+        for word in vocab:
+            selected = word == self.field.value and 'selected' or ''
+            option = f'<option value="{word}" {selected}>{word}</option>'
+            options.append(option)
+        return "<select %s>%s<select>" % (self._kw2attr(**kwargs),
+                                          '\n'.join(options))
 
 def all_combos():
     combos = []
@@ -194,3 +217,19 @@ def all_combos():
             name = f' {fname} with {wname}'
             combos.append(name)
     return sorted(combos)
+
+def all_fieldnames():
+    out = []
+    clsmembers = inspect.getmembers(sys.modules[__name__], inspect.isclass)
+    for name, klass in clsmembers:
+        if issubclass(klass, Field) and klass != Field:
+            out.append(name)
+    return sorted(out)
+
+def all_widgetnames():
+    out = []
+    clsmembers = inspect.getmembers(sys.modules[__name__], inspect.isclass)
+    for name, klass in clsmembers:
+        if issubclass(klass, Widget) and klass != Widget:
+            out.append(name)
+    return sorted(out)

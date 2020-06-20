@@ -66,6 +66,7 @@ class ObjectDict(dict):
         return '<br>'.join([f'{k} {v}' for k,v in sorted(self.items())])
 
 
+
 class Node(ObjectDict):
 
     def __init__(self, db, *labels, **props):
@@ -103,6 +104,8 @@ class Node(ObjectDict):
                 return self[k]
         return self.id[:6]
 
+    def f(self, key):
+        return self.db.schemahandler.property_field(self,key)
 
 class Edge(ObjectDict):
     def __init__(self, db, source=None, reltype=None, target=None, **props):
@@ -133,6 +136,9 @@ class Edge(ObjectDict):
 
     def __repr__(self):
         return "%s --[%s]--> %s" % (self.source, self.reltype, self.target)
+
+    def f(self, key):
+        return self.db.schemahandler.property_field(self,key)
 
 
 class ResultWrapper:
