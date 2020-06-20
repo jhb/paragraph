@@ -38,10 +38,7 @@
 
             </label>
             <div class="uk-form-controls">
-                <input name="formdata_${key}"
-                       id="${key}"
-                       value="${value}"
-                       class="uk-input uk-form-blank">
+                ${structure: getWidget(key,value).edit(id=key,name='formdata_'+key, klass="uk-input uk-form-blank")}
             </div>
         </div>
         <div class="uk-text-muted">^ delete</div>
@@ -55,7 +52,9 @@
                 <input name="newprop_name" id="_newprop_name" value="" class="uk-input" list="propertynames" autocomplete="off">
                 <datalist id="propertynames">
                     <option tal:repeat="propertynode db.schemahandler.propertynodes"
-                            value="${propertynode._techname} - ${propertynode.description[:60]}">
+                            value="${propertynode._techname}">
+                        ${propertynode._techname} - ${propertynode.description[:60]}
+                    </option>
                 </datalist>
             </div>
         </div>
@@ -71,11 +70,12 @@
 
         <div>
             <label for="_newprop_type" class="uk-form-label">type</label>
-            <div class="uk-form-controls"><select name="newprop_type" id="_newprop_type" class="uk-select">
-                <option tal:repeat="typename sorted(typemap.keys())"
-                        tal:attributes="selected typename=='string'"
-                        value="${typename}">${typename}</option>
-            </select></div>
+            <div class="uk-form-controls">
+                <select name="newprop_type" id="_newprop_type" class="uk-select">
+                    <option tal:repeat="typename sorted(typemap.keys())"
+                            tal:attributes="selected typename=='string'"
+                            value="${typename}">${typename}</option>
+                </select></div>
         </div>
         <div>&nbsp;</div>
         <div>

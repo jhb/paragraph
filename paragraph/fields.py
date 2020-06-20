@@ -113,8 +113,7 @@ class CSVLineField(Field):
         return ';'.join(self.value)
 
     def from_db(self,value):
-        v = value.split(';')
-        self.value = v
+        self.value = [v.strip() for v in value.split(';')]
         return self.value
 
 class Widget:
@@ -125,6 +124,10 @@ class Widget:
         self.field = field
 
     def _kw2attr(self,**kwargs):
+        if 'klass' in kwargs:
+            kwargs['class']=kwargs['klass']
+            del(kwargs['klass'])
+
         return ' '.join([f'{k}="{v}"' for k,v in kwargs.items()])
 
     def edit(self,**kwargs):

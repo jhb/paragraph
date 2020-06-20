@@ -32,6 +32,11 @@ class NeoGraphDB:
         self.debug = debug
         self._nodecache = {}
         self._edgecache = {}
+        self.propdict = {}
+        self._update_propdict()
+
+
+
 
     def begin(self):
         """Begin a transaction
@@ -232,6 +237,11 @@ class NeoGraphDB:
     @property
     def schemahandler(self):
         return Schemahandler(self)
+
+    def _update_propdict(self): # 00_maybe better db.propdict? How do we proper cache this?
+        self.propdict = {p['_techname']: p for p in self.schemahandler.propertynodes}
+
+
 
 class Neo4jWrapper(ResultWrapper):
 

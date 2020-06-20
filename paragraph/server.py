@@ -17,8 +17,10 @@ from paragraph.basic import ObjectDict, ResultWrapper
 import neo4j
 from paragraph.tal_templates import TalTemplates
 from flask_wtf import FlaskForm
+import wtforms as wtf
 from wtforms import Form,StringField
 from paragraph.execute import run_script
+from paragraph import fields
 
 app = Flask(__name__)
 # turn of caching for static files during development
@@ -28,6 +30,7 @@ templates = TalTemplates()
 db = NeoGraphDB(debug=0)
 
 typemap = dict(string=str,integer=int, boolean='bool')
+
 
 @app.route('/')
 def hello_world():
@@ -57,19 +60,33 @@ def show_node(node_id):
 
 
 def edit_obj(obj,request,excluded=['_id']):
-    class MyForm(Form):
-            labels = StringField('labels')
+    propdict = db.propdict
+
+    _field_class = getattr(fields,propdict['_field']['_field'])
+
+    def getPropFieldClass(name,default=fields.StringField): # 00_todo what should be the default? @@_todo
+        if name in propdict:
+            prop = propdict[name]
+            fname = _field_class(prop['_field']).get_value()
+            fieldclass = getattr(fields, fname, default)
+        else:
+            fieldclass = default
+        return fieldclass
+
+    class MyForm(wtf.Form):
+            labels = wtf.StringField('labels')
+
     for k,v in obj.items():
         if k in ['_id']:
             continue
         vt = type(v)
         if vt is str or 1:
-            setattr(MyForm,'formdata_'+k,StringField('formdata_'+k))
+            setattr(MyForm,'formdata_'+k,wtf.StringField('formdata_'+k))
     for k in ['name','value','type']:
         name = 'newprop_'+k
-        setattr(MyForm,name,StringField(name))
+        setattr(MyForm,name,wtf.StringField(name))
 
-    MyForm.applyschema=StringField('applyschema') # 00_todo replace by proper string field
+    MyForm.applyschema=wtf.StringField('applyschema') # 00_todo replace by proper string field
 
     form = MyForm(request.form)
     if form.validate():
@@ -81,26 +98,62 @@ def edit_obj(obj,request,excluded=['_id']):
             if k in excluded:
                 continue
 
-            obj[k]=form['formdata_'+k].data
+            #obj[k]=form['formdata_'+k].data
+            fieldclass = getPropFieldClass(k)
+            value = fieldclass(form['formdata_'+k].data).get_value()
+            obj[k]=value
         obj.labels = set([l.strip() for l in form.labels.data.split(':') if l])
 
         if form.newprop_name.data and form.newprop_type.data:
-            # get type from property, otherwise from typemap
-            newtype = typemap.get(form.newprop_type.data,str)
-            value = newtype(form.newprop_value.data) or ''
             name = form.newprop_name.data
+            # hack for lazy property form in node_edit
             if ' - ' in name:
                 name = name.split(' - ')[0].strip()
+
+
+            # get type from property, otherwise from typemap
+            if name in propdict:
+                fieldclass = getPropFieldClass(name)
+                f = fieldclass(form.newprop_value.data)
+                value = f.get_value()
+                print('Field',f.__class__)
+            else:
+                newtype = typemap.get(form.newprop_type.data,str)
+                value = newtype(form.newprop_value.data) or ''
+
+
+
             if name not in excluded:
                 obj[name]=value
 
         if form.applyschema.data:
             db.schemahandler.apply_to_node(form.applyschema.data,obj)
 
-
         return True
     else:
         return False
+
+def getWidgetClass(name,default=fields.StringWidget):
+    prop = db.propdict.get(name,None)
+    if '_widget' in prop:
+            return getattr(prop, '_widget', default)
+    else:
+        return default
+
+def getWidget(propname, value, defaultfield=fields.StringField, defaultwidget=fields.StringWidget):
+    if propname in db.propdict:
+        prop = db.propdict[propname]
+        fieldclassname = prop.get('_field','')
+        fieldclass = getattr(fields, fieldclassname, defaultfield)
+        field = fieldclass(value)
+        widgetclassname = prop.get('_widget','')
+        widgetclass = getattr(fields, widgetclassname, defaultwidget)
+        widget = widgetclass(field)
+        return widget
+    else:
+        return defaultwidget(defaultfield(value))
+
+
 
 
 @app.route('/edit_node/<string:node_id>', methods=['GET','POST'])
@@ -111,7 +164,7 @@ def edit_node(node_id):
         if validated:
             node = db.update_node(node)
             db.commit()
-    return templates.edit_node(db=db,node=node,typemap=typemap)
+    return templates.edit_node(db=db,node=node,typemap=typemap, getWidget=getWidget)
 
 @app.route('/edit_edge/<string:edge_id>', methods=['GET','POST'])
 def edit_edge(edge_id):
@@ -121,7 +174,7 @@ def edit_edge(edge_id):
         if validated:
             edge = db.update_edge(edge)
             db.commit()
-    return templates.edit_edge(db=db,edge=edge,typemap=typemap)
+    return templates.edit_edge(db=db,edge=edge,typemap=typemap, getWidget=getWidget)
 
 @app.route('/add_node')
 def add_node():
