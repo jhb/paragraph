@@ -71,6 +71,18 @@ def test_ScriptField(ld):
     result = f3.get_value()
     assert result.nodes[0] == ld.alice
 
+def test_CSVLineField():
+    data = ['a','b','c']
+    f = fields.CSVLineField(data)
+    assert f.value == data
+    assert f.to_db() == 'a;b;c'
+    assert str(f) == 'a;b;c'
+    f2 = fields.CSVLineField()
+    f2.from_db('a;b;c')
+    assert f.value == f2.value
+
+
+
 def test_ListWidget():
     data = ['a','b','c']
     f = fields.ListField(data)
@@ -90,5 +102,5 @@ def test_combos():
 
 def test_jhb():
     f = fields.JsonOrStringField(['a','b','c',['x%s'  % i  for i in range(5)],dict(foo=1,bar=2)])
-    w = fields.TextWidget(f)
+    w = fields.TextAreaWidget(f)
     print(w.edit())

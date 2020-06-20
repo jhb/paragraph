@@ -1,6 +1,7 @@
 import sys
 import inspect
 import json
+import io
 
 import yaml
 
@@ -103,7 +104,18 @@ class ScriptField(Field):
             return printvalue
 
 
+class CSVLineField(Field):
 
+    def __str__(self):
+        return self.to_db()
+
+    def to_db(self):
+        return ';'.join(self.value)
+
+    def from_db(self,value):
+        v = value.split(';')
+        self.value = v
+        return self.value
 
 class Widget:
 
@@ -126,7 +138,7 @@ class Widget:
         return f"<{_tag} {self._kw2attr(**kwargs)}>{str(self.field.value)}</{_tag}>"
 
 class StringWidget(Widget):
-    possible_fields = [StringField]
+    possible_fields = [StringField, CSVLineField]
 
 class LinesWidget(Widget):
 
@@ -147,7 +159,7 @@ class ListWidget(LinesWidget):
         return f"<{_tag} {self._kw2attr(**kwargs)}>{data}</{_tag}>"
 
 
-class TextWidget(Widget):
+class TextAreaWidget(Widget):
 
     possible_fields = [StringField, JsonOrStringField, YamlField, ScriptField]
 
@@ -155,7 +167,7 @@ class TextWidget(Widget):
         return "<textarea %s>%s</textarea>" % (self._kw2attr(**kwargs),
                                                str(self.field))
 
-class HTMlWidget(TextWidget):
+class HTMlWidget(TextAreaWidget):
     possible_fields = [StringField]
 
     # #use some wysiwyg editor for edit, or md
