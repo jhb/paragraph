@@ -88,17 +88,17 @@ class Node(ObjectDict):
         self.update(data)
 
     def oN(self, *reltypes, minhops=1, maxhops=1, ids=False, **filters):
-        return self.db.traverse(self).oN(*reltypes,minhops=minhops,maxhops=maxhops,ids=ids,**filters)
+        return self.db.traverse(nodes=self).oN(*reltypes,minhops=minhops,maxhops=maxhops,ids=ids,**filters)
 
     def iN(self, *reltypes, minhops=1, maxhops=1, ids=False, **filters):
-        return self.db.traverse(self).iN(*reltypes,minhops=minhops,maxhops=maxhops,ids=ids,**filters)
+        return self.db.traverse(nodes=self).iN(*reltypes,minhops=minhops,maxhops=maxhops,ids=ids,**filters)
 
     def __repr__(self):
         return "(%s %s %s)" % (next(iter(self.labels),'Node'),self.id[:6],self.dn())
 
 
     def dn(self):
-        for k in ['_dn','name','title','_schemaname','_techname','id']:
+        for k in ['_dn','name','title','_schemaname','_propname','_reltype','id']:
             if k in self:
                 return self[k]
         return self.id[:6]

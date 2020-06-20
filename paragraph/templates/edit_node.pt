@@ -37,8 +37,9 @@
                 ${key}
 
             </label>
-            <div class="uk-form-controls">
-                ${structure: getWidget(key,value).edit(id=key,name='formdata_'+key, klass="uk-input uk-form-blank")}
+            <div class="uk-form-controls"
+                 tal:define="widget getWidget(key,value)">
+                ${structure: widget.edit(id=key,name='formdata_'+key, klass=widget.uik+" uk-form-blank")}
             </div>
         </div>
         <div class="uk-text-muted">^ delete</div>
@@ -52,8 +53,8 @@
                 <input name="newprop_name" id="_newprop_name" value="" class="uk-input" list="propertynames" autocomplete="off">
                 <datalist id="propertynames">
                     <option tal:repeat="propertynode db.schemahandler.propertynodes"
-                            value="${propertynode._techname}">
-                        ${propertynode._techname} - ${propertynode.description[:60]}
+                            value="${propertynode._propname}">
+                        ${propertynode._propname} - ${propertynode.description[:60]}
                     </option>
                 </datalist>
             </div>

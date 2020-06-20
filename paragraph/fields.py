@@ -119,6 +119,7 @@ class CSVLineField(Field):
 class Widget:
 
     possible_fields = [StringField]
+    uik = "uk-input"
 
     def __init__(self,field):
         self.field = field
@@ -144,6 +145,7 @@ class StringWidget(Widget):
     possible_fields = [StringField, CSVLineField]
 
 class LinesWidget(Widget):
+    uik = "uk-textarea"
 
     possible_fields = [ListField]
 
@@ -163,6 +165,7 @@ class ListWidget(LinesWidget):
 
 
 class TextAreaWidget(Widget):
+    uik = "uk-textarea"
 
     possible_fields = [StringField, JsonOrStringField, YamlField, ScriptField]
 

@@ -8,7 +8,7 @@ class Schemahandler:
 
     @property
     def propertynodes(self):
-        return sorted(self.db.query_nodes('_Property').nodes, key=lambda x: x.get('_techname',''))
+        return sorted(self.db.query_nodes('_Property').nodes, key=lambda x: x.get('_propname',''))
 
     @property
     def schemanodes(self):
@@ -26,9 +26,9 @@ class Schemahandler:
             raise Exception('Wrong schema selection')
         schema = candidates[0]
         node.labels.add(schema['_schemaname'])
-        for propertynode in schema.oN('_PROP').nodes:
+        for propertynode in schema.oN('_PROP', _arity='1').nodes:
             fieldtype = propertynode['_fieldtype']
-            name = propertynode['_techname']
+            name = propertynode['_propname']
             if name not in node:
                 node[name]=self.default_values.get(fieldtype,'')
 
@@ -36,7 +36,7 @@ class Schemahandler:
         schemata = set()
         nodeprops = set(node.keys())
         for schemanode in self.schemanodes:
-            schemaprops = set([pn['_techname'] for pn in schemanode.oN('_PROP').nodes])
+            schemaprops = set([pn['_propname'] for pn in schemanode.oN('_PROP', _arity='1').nodes])
             if schemaprops and schemaprops.issubset(nodeprops):
                 schemata.add(schemanode)
         return schemata
@@ -44,7 +44,7 @@ class Schemahandler:
     def property_description(self, propertyname):
         pn = self.propertynodes
         for p in pn:
-            if p['_techname'] == propertyname:
+            if p['_propname'] == propertyname:
                 return p['description']
         return ''
 

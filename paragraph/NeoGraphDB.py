@@ -50,7 +50,7 @@ class NeoGraphDB:
     def _run(self, statement, **kwargs):
         tx = self.begin()
         if self.debug:  #
-            print(f'{statement} {kwargs}')  # 00_todo
+            print(f'{statement} --- {kwargs}')  # 00_todo
             if self.debug==2:
                 self.debug=0
         result =  tx.run(statement, **kwargs)
@@ -153,8 +153,8 @@ class NeoGraphDB:
             if type(reltypes) not in [list, tuple]:
                 reltypes = [reltypes]
             relstring = ':' + '|'.join(reltypes)
-        for k, v in filters.items():
-            filters[k] = self._nodeid(v)
+        #for k, v in filters.items():
+        #    filters[k] = self._nodeid(v)
         wheres = []
         params = dict(filters=filters)
         if source:
@@ -205,7 +205,7 @@ class NeoGraphDB:
         result = self._run(statement,**params)
         return Neo4jWrapper(result, self)
 
-    def traverse(self, nodes=None, labels=None,  **filters):
+    def traverse(self, labels=None, nodes=None, **filters):
         if labels is None:
             labels = []
         elif type(labels) is str:
@@ -239,7 +239,7 @@ class NeoGraphDB:
         return Schemahandler(self)
 
     def _update_propdict(self): # 00_maybe better db.propdict? How do we proper cache this?
-        self.propdict = {p['_techname']: p for p in self.schemahandler.propertynodes}
+        self.propdict = {p['_propname']: p for p in self.schemahandler.propertynodes}
 
 
 

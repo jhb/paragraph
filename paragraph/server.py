@@ -133,12 +133,7 @@ def edit_obj(obj,request,excluded=['_id']):
     else:
         return False
 
-def getWidgetClass(name,default=fields.StringWidget):
-    prop = db.propdict.get(name,None)
-    if '_widget' in prop:
-            return getattr(prop, '_widget', default)
-    else:
-        return default
+
 
 def getWidget(propname, value, defaultfield=fields.StringField, defaultwidget=fields.StringWidget):
     if propname in db.propdict:
