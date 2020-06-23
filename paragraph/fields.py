@@ -173,6 +173,8 @@ class TextAreaWidget(Widget):
     possible_fields = [StringField, JsonOrStringField, YamlField, ScriptField]
 
     def edit(self,**kwargs):
+        numlines = len(self.field.value.split('\n'))
+        kwargs['rows']=numlines
         return "<textarea %s>%s</textarea>" % (self._kw2attr(**kwargs),
                                                str(self.field))
 

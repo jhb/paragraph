@@ -1,7 +1,7 @@
 .CodeMirror {
     border: 1px solid black;
     height: 8em !important;
-    width: 50vw;
+    width: 47vw;
     resize: vertical;
 }
 
@@ -61,4 +61,21 @@ body {
 .header {
     font-size: large;
     font-weight: bold;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+    margin: 0;
+}
+
+
+.listcolumn, .detailcolumn {
+    float: left;
+    width: 50%;
+    height: 100%;
+    overflow: auto;
+    box-sizing: border-box;
+    padding: 0.5em;
+    scrollbar-color: #fafafa white;
 }
