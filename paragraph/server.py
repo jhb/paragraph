@@ -1,4 +1,5 @@
 import abc
+import os
 from collections import UserList, OrderedDict, UserDict
 import mimetypes
 
@@ -8,7 +9,7 @@ mimetypes.add_type('text/css', '.css')
 mimetypes.add_type('text/javascript', '.js')
 
 import traceback
-from flask import Flask, request
+from flask import Flask, request, send_from_directory
 from paragraph.NeoGraphDB import NeoGraphDB
 from paragraph.simpletraverser import SimpleTraverser
 import sys
@@ -21,6 +22,12 @@ import wtforms as wtf
 from wtforms import Form,StringField
 from paragraph.execute import run_script
 from paragraph import fields
+from dotenv import find_dotenv, load_dotenv
+
+load_dotenv()
+
+files = os.path.join(os.path.dirname(find_dotenv()), os.getenv("FILEPATH"))
+os.environ['FILES']=files
 
 app = Flask(__name__)
 # turn of caching for static files during development
@@ -205,5 +212,12 @@ def delete_edge(edge_id):
     db.commit()
     return ''
 
+@app.route('/files/<path:path>')
+def files(path):
+    return send_from_directory(os.getenv('FILES'),path)
+
+
 if __name__ == '__main__':
+
     app.run('0.0.0.0', debug=True, )
+
