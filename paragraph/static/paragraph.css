@@ -1,7 +1,7 @@
 .CodeMirror {
     border: 1px solid black;
     height: 8em !important;
-    width: 47vw;
+    width: 95%;
     resize: vertical;
 }
 
@@ -9,7 +9,7 @@
     counter-reset: listing;
     border: 1px dashed grey;
     padding: 2px;
-    width: 100%;
+    width: 95%;
 }
 
 code {

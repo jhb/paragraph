@@ -2,6 +2,7 @@ import sys
 import inspect
 import json
 import io
+from markdown import markdown
 
 import yaml
 
@@ -189,6 +190,12 @@ class HTMLWidget(TextAreaWidget):
 
     def html(self, _tag='div', **kwargs):
         return super().html(_tag,**kwargs)
+
+class MarkdownWidget(TextAreaWidget):
+
+    def html(self, _tag='span', **kwargs):
+        text = markdown(str(self.field.value))
+        return f"<{_tag} {self._kw2attr(**kwargs)}>{text}</{_tag}>"
 
 class ScriptWidget(Widget):
     possible_fields = [StringField]
