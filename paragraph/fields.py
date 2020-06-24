@@ -178,6 +178,10 @@ class TextAreaWidget(Widget):
         return "<textarea %s>%s</textarea>" % (self._kw2attr(**kwargs),
                                                str(self.field))
 
+    def html(self, _tag='span', **kwargs):
+        brtext = str(self.field.value).replace('\n','<br>')
+        return f"<{_tag} {self._kw2attr(**kwargs)}>{brtext}</{_tag}>"
+
 class HTMLWidget(TextAreaWidget):
     possible_fields = [StringField]
 
