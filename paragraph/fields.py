@@ -2,6 +2,7 @@ import sys
 import inspect
 import json
 import io
+from markdown import markdown
 
 import yaml
 
@@ -173,8 +174,14 @@ class TextAreaWidget(Widget):
     possible_fields = [StringField, JsonOrStringField, YamlField, ScriptField]
 
     def edit(self,**kwargs):
+        numlines = len(self.field.value.split('\n'))
+        kwargs['rows']=numlines
         return "<textarea %s>%s</textarea>" % (self._kw2attr(**kwargs),
                                                str(self.field))
+
+    def html(self, _tag='span', **kwargs):
+        brtext = str(self.field.value).replace('\n','<br>')
+        return f"<{_tag} {self._kw2attr(**kwargs)}>{brtext}</{_tag}>"
 
 class HTMLWidget(TextAreaWidget):
     possible_fields = [StringField]
@@ -183,6 +190,12 @@ class HTMLWidget(TextAreaWidget):
 
     def html(self, _tag='div', **kwargs):
         return super().html(_tag,**kwargs)
+
+class MarkdownWidget(TextAreaWidget):
+
+    def html(self, _tag='span', **kwargs):
+        text = markdown(str(self.field.value))
+        return f"<{_tag} {self._kw2attr(**kwargs)}>{text}</{_tag}>"
 
 class ScriptWidget(Widget):
     possible_fields = [StringField]

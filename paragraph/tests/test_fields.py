@@ -93,7 +93,7 @@ def test_ListWidget():
 def test_HTMLWidget():
     data = '<h1>Testheading</h1>'
     f = fields.StringField(data)
-    lh = fields.HTMlWidget(f)
+    lh = fields.HTMLWidget(f)
     assert lh.edit(name='bla') == '<textarea name="bla"><h1>Testheading</h1></textarea>'
     assert lh.html(name='bla') == '<div name="bla"><h1>Testheading</h1></div>'
 

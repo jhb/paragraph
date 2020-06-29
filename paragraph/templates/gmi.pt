@@ -4,11 +4,11 @@
     <head>
         <title metal:fill-slot="title">Query</title>
         <span tal:omit-tag="" metal:fill-slot="headslot">
-            <script src="${flask.url_for('static', filename='codemirror.js')}"></script>
-            <link rel="stylesheet" href="${flask.url_for('static', filename='codemirror.css')}">
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.55.0/codemirror.min.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.55.0/codemirror.min.css">
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.4.6/dist/css/uikit.min.css" />
 
-            <script src="${flask.url_for('static', filename='python.js')}"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.55.0/mode/python/python.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/mermaid@8.4.0/dist/mermaid.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/uikit@3.4.6/dist/js/uikit.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/uikit@3.4.6/dist/js/uikit-icons.min.js"></script>
@@ -21,9 +21,8 @@
 
     <span metal:fill-slot="content" tal:omit-tag="">
     <span metal:define-macro="ajax" tal:omit-tag="">
-<table border="0" class="basetable">
-    <tr valign="top">
-        <td>
+
+        <div class="listcolumn">
             <h2>Query</h2>
             <form action="/gmi" id='codeform' class="uk-form">
                 <input type='hidden' name='lastline' id='lastline'>
@@ -143,14 +142,13 @@ print(result.rows[0]['n'].oN().nodes)
                     <pre style="">${printvalue}</pre>
                 </div>
             </div>
-        </td>
-        <td style="border-left: 0.5px solid darkgrey; min-height: 50vh; max-height: 50vh; min-width: 100%">
+        </div>
+        <div class="detailcolumn" xstyle="border-left: 0.5px solid darkgrey; min-height: 50vh; max-height: 50vh; min-width: 100%">
             <div id="action"></div>
 
-        </td>
+        </div>
 
-    </tr>
-</table>
+
 <div id="samplediv" style="height:0;width:0;outline:none;border:none;padding:none;margin:none;box-sizing:content-box;"></div>
   <c tal:condition="request.values.get('lastline')"
              tal:replace="structure string:<script>var lastline=${request.values.get('lastline',0)};var lastch=${request.values.get('lastch',0)};</script>" />

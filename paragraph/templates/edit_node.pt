@@ -39,10 +39,15 @@
             </label>
             <div class="uk-form-controls"
                  tal:define="widget getWidget(node,key)">
+                <span id="${key}-edit" style="display:none">
                 ${structure: widget.edit(id=key,name='formdata_'+key, klass=widget.uik+" uk-form-blank")}
+                </span>
+                <div id="${key}-show" class="uk-textarea uk-form-blank" onclick="$('#${key}-edit').toggle(); $(this).toggle()">
+                    ${structure: widget.html(id=key,name='formdata_'+key, style="margin-bottom: 1px")}&nbsp;
+                </div>
             </div>
         </div>
-        <div class="uk-text-muted">^ delete</div>
+        <div class="uk-text-muted">↑ delete</div>
         <div>&nbsp;</div>
         <div>&nbsp;</div>
         <hr>
