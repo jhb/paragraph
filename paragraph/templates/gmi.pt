@@ -4,11 +4,11 @@
     <head>
         <title metal:fill-slot="title">Query</title>
         <span tal:omit-tag="" metal:fill-slot="headslot">
-            <script src="${flask.url_for('static', filename='codemirror.js')}"></script>
-            <link rel="stylesheet" href="${flask.url_for('static', filename='codemirror.css')}">
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.55.0/codemirror.min.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.55.0/codemirror.min.css">
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.4.6/dist/css/uikit.min.css" />
 
-            <script src="${flask.url_for('static', filename='python.js')}"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.55.0/mode/python/python.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/mermaid@8.4.0/dist/mermaid.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/uikit@3.4.6/dist/js/uikit.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/uikit@3.4.6/dist/js/uikit-icons.min.js"></script>
