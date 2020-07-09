@@ -1,59 +1,70 @@
 <html tal:omit-tag="">
 <body tal:omit-tag="" tal:define="gmi_template load:./gmi.pt;
                                   nodelink gmi_template.macros.nodelink;
-                                  edgelinka gmi_template.macros.edgelinka;">
+                                  edgelinka gmi_template.macros.edgelinka;
+                                  obj node;">
+
     <div class="uk-h3">Node ${node.id[:6]}
         <div class="uk-text-meta">Schemata: ${', '.join(sorted([s['_schemaname'] for s in db.schemahandler.find_schemata(node)]))}</div>
     </div>
-    <form class="uk-form-horizontal" id="edit-form" action="${flask.url_for('edit_node',node_id=node.id)}">
-        <div>
-            <label for="_id" class="uk-form-label"
-                   title="uuid of an object"><span class="spacer"></span>id</label>
-            <div class="uk-form-controls">
-                <input id="_id" disabled value="${node.id}" class="uk-input uk-form-blank">
-            </div>
-        </div>
-        <div>&nbsp;</div>
-        <div>
-            <label for="labels" class="uk-form-label" title="Comma seperated labels">
-                <span class="spacer"></span>
-                labels
-            </label>
+    <form  id="edit-form" action="${flask.url_for('edit_node',node_id=obj.id)}">
+        <table class="uk-table uk-table-middle uk-table-hover uk-table-justify" border="0">
+            <tr>
+                <td class="uk-table-shrink"></td>
+                <td class="uk-table-shrink">
+                    <label for="_id" class="uk-form-label"
+                           title="uuid of an object">id</label>
+                </td>
+                <td class="uk-table-expand">
 
-            <div class="uk-form-controls">
-                <input name="labels" id="labels" value="${':'.join(sorted(list(node.labels)))}"
-                       class="uk-input uk-form-blank"/>
-            </div>
-            
-        </div>
+                    <input id="_id" disabled value="${obj.id}" class="uk-input uk-form-blank">
+                </td>
+                <td class="uk-table-shrink"></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>
+                    <label for="labels" class="uk-form-label" title="Comma seperated labels">
+                        labels
+                    </label>
+                </td><td>
 
-        <div tal:repeat="(key,value) [(k,v) for k,v in sorted(node.items()) if k!='_id']">
-            <label for="${key}"
-                   class="uk-form-label"
-                   title="${db.schemahandler.property_description(key) or 'bla'}">
-                <span class="delete-checkbox">
-                    <input type="checkbox" class="uk-checkbox" name="_delete_${key}">
-                </span>
-                ${key}
+                        <input name="labels" id="labels" value="${':'.join(sorted(list(obj.labels)))}"
+                               class="uk-input uk-form-blank"/>
 
-            </label>
-            <div class="uk-form-controls"
-                 tal:define="widget getWidget(node,key)">
-                <span id="${key}-edit" style="display:none">
-                ${structure: widget.edit(id=key,name='formdata_'+key, klass=widget.uik+" uk-form-blank")}
-                </span>
-                <div id="${key}-show" class="uk-textarea uk-form-blank" onclick="$('#${key}-edit').toggle(); $(this).toggle()">
-                    ${structure: widget.html(id=key,name='formdata_'+key, style="margin-bottom: 1px")}&nbsp;
+                </td>
+                <td></td>
+            </tr>
+
+            <tr tal:repeat="(key,value) [(k,v) for k,v in sorted(obj.items()) if k!='_id']">
+                <td><span class="delete-checkbox">
+                            <input type="checkbox" class="uk-checkbox" name="_delete_${key}" /></span></td>
+                <td>
+                    <label for="${key}"
+                           class="uk-form-label"
+                           title="${db.schemahandler.property_description(key) or 'bla'}">${key}</label>
+                </td>
+                <td>
+                <div class="uk-form-controls"
+                     tal:define="widget getWidget(obj, key)">
+                    <span id="${key}-edit" style="display:none">
+                    ${structure: widget.edit(id=key,name='formdata_'+key, klass=widget.uik+" uk-form-blank")}
+                    </span>
+                    <div id="${key}-show" class="uk-textarea uk-form-blank" onclick="$('#${key}-edit').toggle(); $(this).toggle()">
+                        ${structure: widget.html(id=key,name='formdata_'+key, style="margin-bottom: 1px")}&nbsp;
+                    </div>
                 </div>
-            </div>
-        </div>
+                </td>
+                <td></td>
+            </tr>
+        </table>
         <div class="uk-text-muted">↑ delete</div>
         <div>&nbsp;</div>
         <div>&nbsp;</div>
         <hr>
         <div>
             New Property<br/>
-            <label for="_newprop_name" class="uk-form-label">name</label>
+            <label for="_newprop_name" class="xuk-form-label">name</label>
             <div class="uk-form-controls">
                 <input name="newprop_name" id="_newprop_name" value="" class="uk-input" list="propertynames" autocomplete="off">
                 <datalist id="propertynames">
@@ -66,7 +77,7 @@
         </div>
 
         <div>
-            <label for="_newprop_value" class="uk-form-label">value</label>
+            <label for="_newprop_value" class="xuk-form-label">value</label>
             <div class="uk-form-controls">
                 <input name="newprop_value" id="_newprop_value" value="" class="uk-input" list="languages">
 
@@ -75,7 +86,7 @@
         </div>
 
         <div>
-            <label for="_newprop_type" class="uk-form-label">type</label>
+            <label for="_newprop_type" class="xuk-form-label">type</label>
             <div class="uk-form-controls">
                 <select name="newprop_type" id="_newprop_type" class="uk-select">
                     <option tal:repeat="typename sorted(typemap.keys())"
@@ -86,7 +97,7 @@
         <div>&nbsp;</div>
         <div>
             Apply property schema<br>
-            <label for="applyschema" class="uk-form-label">Schema</label>
+            <label for="applyschema" class="xuk-form-label">Schema</label>
             <div class="uk-form-controls">
                 <select name="applyschema" id="applyschema" class="uk-select">
                     <option value=""></option>
@@ -95,35 +106,34 @@
                 </select>
             </div>
         </div>
-        <div>&nbsp;</div>
-        <div>
-<!--?            <input type="submit" value="save" class="uk-input">Save</input>-->
-            <button class="uk-button uk-button-primary">Save</button>
-            <div>&nbsp;</div>
-            <div class="uk-text-right"><a class="uk-button uk-button-danger"
-               href="/delete_node/${node.id}"
-               onclick="delete_node('${node.id}'); return false;">Delete node</a></div>
-        </div>
-        <hr>
-        <div>&nbsp;</div>
-        <table class='linktable uk-align-right' style="display: inline-table;" border="0">
-            <tr><td colspan="2" class="uk-text-right uk-text-muted">OUTGOING</td></tr>
-            <tr tal:repeat="edge node.oN().edges">
-                <td><span metal:use-macro="edgelinka"></span>&nbsp;</td>
-                <td><span tal:omit-tag="" tal:define="node edge.target" metal:use-macro="nodelink"></span></td>
-            </tr>
-        </table>
-
-        <table class='linktable uk-align-left' style="display: inline-table;" border="0">
-            <tr><td colspan="2" class="uk-text-left uk-text-muted">INCOMING</td></tr>
-            <tr tal:repeat="edge node.iN().edges">
-                <td><span tal:omit-tag="" tal:define="node edge.source" metal:use-macro="nodelink"></span></td>
-                <td>&nbsp;<span metal:use-macro="edgelinka"></span></td>
-            </tr>
-        </table>
-
-
     </form>
+    <div>&nbsp;</div>
+    <div>
+<!--?            <input type="submit" value="save" class="uk-input">Save</input>-->
+        <button class="uk-button uk-button-primary">Save</button>
+        <div>&nbsp;</div>
+        <div class="uk-text-right"><a class="uk-button uk-button-danger"
+           href="/delete_node/${node.id}"
+           onclick="delete_node('${node.id}'); return false;">Delete</a></div>
+    </div>
+    <hr>
+    <div>&nbsp;</div>
+    <table class='linktable uk-align-right' style="display: inline-table;" border="0">
+        <tr><td colspan="2" class="uk-text-right uk-text-muted">OUTGOING</td></tr>
+        <tr tal:repeat="edge node.oN().edges">
+            <td><span metal:use-macro="edgelinka"></span>&nbsp;</td>
+            <td><span tal:omit-tag="" tal:define="node edge.target" metal:use-macro="nodelink"></span></td>
+        </tr>
+    </table>
+
+    <table class='linktable uk-align-left' style="display: inline-table;" border="0">
+        <tr><td colspan="2" class="uk-text-left uk-text-muted">INCOMING</td></tr>
+        <tr tal:repeat="edge node.iN().edges">
+            <td><span tal:omit-tag="" tal:define="node edge.source" metal:use-macro="nodelink"></span></td>
+            <td>&nbsp;<span metal:use-macro="edgelinka"></span></td>
+        </tr>
+    </table>
+
     <script>
         $( "#edit-form" ).submit(function(event) {
             event.preventDefault();

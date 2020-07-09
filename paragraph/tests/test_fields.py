@@ -94,13 +94,13 @@ def test_HTMLWidget():
     data = '<h1>Testheading</h1>'
     f = fields.StringField(data)
     lh = fields.HTMLWidget(f)
-    assert lh.edit(name='bla') == '<textarea name="bla"><h1>Testheading</h1></textarea>'
+    assert lh.edit(name='bla') == '<textarea name="bla" rows="1"><h1>Testheading</h1></textarea>'
     assert lh.html(name='bla') == '<div name="bla"><h1>Testheading</h1></div>'
 
 def test_combos():
     print(fields.all_combos())
 
 def test_jhb():
-    f = fields.JsonOrStringField(['a','b','c',['x%s'  % i  for i in range(5)],dict(foo=1,bar=2)])
+    f = fields.JsonOrStringField(['a', 'b', 'c', ['x%s'  % i  for i in range(5)], dict(foo=1,bar=2)])
     w = fields.TextAreaWidget(f)
     print(w.edit())

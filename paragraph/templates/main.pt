@@ -13,8 +13,9 @@
         <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
         <script src="${flask.url_for('static', filename='paragraph.js')}"></script>
         <link rel="shortcut icon" href="${flask.url_for('static', filename='favicon.ico')}" />
-        <link rel="stylesheet" href="${flask.url_for('static', filename='paragraph.css')}">
+
         <c metal:define-slot="headslot" tal:omit-tag=""></c>
+        <link rel="stylesheet" href="${flask.url_for('static', filename='paragraph.css')}">
     </head>
     <body>
     <span metal:define-macro="ajaxcontent" tal:omit-tag=""><div metal:define-slot="content" tal:omit-tag=""></div></span>

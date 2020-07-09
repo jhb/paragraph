@@ -29,7 +29,7 @@
                 <input type='hidden' name='lastch' id='lastch'>
                 <textarea id="codeeditor" name="statement" cols="60" rows="5"
                      tal:define="statement request.values.get('statement')"
-                     tal:content="statement and statement or default">#result = db.traverse().oN()
+                     tal:content="statement and statement or default">#result = db()
 result = db.query('match (n)-[r*1..2]->(m) return n, "foo", r, m')
 for row in result.rows:
     print(row['n'].get('name',row['n'].id[:6]))

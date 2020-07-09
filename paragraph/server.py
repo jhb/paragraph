@@ -71,7 +71,7 @@ def edit_obj(obj,request,excluded=['_id']):
 
     _field_class = getattr(fields,propdict['_field']['_field'])
 
-    def getPropFieldClass(name,default=fields.StringField): # 00_todo what should be the default? @@_todo
+    def getPropFieldClass(name,default=fields.StringField): # 00_todo what should be the default? 00_todo
         if name in propdict:
             prop = propdict[name]
             fname = _field_class(prop['_field']).get_value()

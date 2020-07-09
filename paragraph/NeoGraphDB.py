@@ -1,7 +1,6 @@
 """Database driver for neo4j"""
 from uuid import uuid4
 
-
 from neo4j import GraphDatabase, BoltStatementResult
 import neo4j
 
@@ -9,6 +8,7 @@ from paragraph.basic import GraphDB, Node, Edge, ResultWrapper
 from paragraph.schemahandler import Schemahandler
 from paragraph.simpletraverser import SimpleTraverser
 from paragraph import signals
+import logging
 
 
 # 00_todo: uses labels and types for filters
@@ -35,9 +35,8 @@ class NeoGraphDB:
         self.propdict = {}
         self._update_propdict()
 
-
-    def __call__(self,*args,**kwargs):
-        return self.query_nodes(*args,**kwargs)
+    def __call__(self, *args, **kwargs):
+        return self.query_nodes(*args, **kwargs)
 
     def begin(self):
         """Begin a transaction
@@ -50,11 +49,10 @@ class NeoGraphDB:
 
     def _run(self, statement, **kwargs):
         tx = self.begin()
-        if self.debug:  #
-            print(f'{statement} --- {kwargs}')  # 00_todo
-            if self.debug==2:
-                self.debug=0
-        result =  tx.run(statement, **kwargs)
+        logging.debug(f'{statement} --- {kwargs}')
+        if self.debug == 2:
+            self.debug = 0
+        result = tx.run(statement, **kwargs)
         result.detach()
         return result
 
@@ -67,11 +65,10 @@ class NeoGraphDB:
             self._nodecache[nodeid] = node
         return self._nodecache[nodeid]
 
-
     def _neo2edge(self, relation):
         edgeid = relation['_id']
         if edgeid not in self._edgecache:
-            edge = Edge(db = self,
+            edge = Edge(db=self,
                         source=self._neo2node(relation.start_node),
                         reltype=relation.type,
                         target=self._neo2node(relation.end_node))
@@ -99,13 +96,13 @@ class NeoGraphDB:
             properties['_id'] = self._new_uid()
         if type(labels) != set:
             labels = set(labels)
-        signals.before_label_store.send(self, labels=labels,properties=properties)
+        signals.before_label_store.send(self, labels=labels, properties=properties)
         labelstring = self._labels2string(labels)
         result = self._run(f'create (n{labelstring}) set n = $props return n', props=properties)
         return self._neo2node(result.single()['n'])
 
     def update_node(self, node: Node):
-        signals.before_label_store.send(self,labels=node.labels, properties=node)
+        signals.before_label_store.send(self, labels=node.labels, properties=node)
         labelstring = self._labels2string(node.labels)
         if labelstring:
             labelstring = 'set n' + labelstring
@@ -127,8 +124,8 @@ class NeoGraphDB:
                               MATCH (n%s) WHERE ALL(k in keys(filters) WHERE filters[k] = n[k])
                               return n''' % labelstring,
                            filters=filters)
-        #return Neo4jWrapper([self._neo2node(r['n']) for r in result],self)
-        return Neo4jWrapper(result,self)
+        # return Neo4jWrapper([self._neo2node(r['n']) for r in result],self)
+        return Neo4jWrapper(result, self)
 
     def add_edge(self, source, reltype, target, **properties):
         if '_id' not in properties:
@@ -154,30 +151,30 @@ class NeoGraphDB:
             if type(reltypes) not in [list, tuple]:
                 reltypes = [reltypes]
             relstring = ':' + '|'.join(reltypes)
-        #for k, v in filters.items():
+        # for k, v in filters.items():
         #    filters[k] = self._nodeid(v)
         wheres = []
         params = dict(filters=filters)
         if source:
             wheres.append('s._id=$_s_id')
-            params['_s_id']=self._nodeid(source)
+            params['_s_id'] = self._nodeid(source)
         if target:
             wheres.append('t._id=$_t_id')
-            params['_t_id']=self._nodeid(target)
+            params['_t_id'] = self._nodeid(target)
         if wheres:
-            wheres.insert(0,'')
+            wheres.insert(0, '')
 
         result = self._run('''with $filters as filters
                               match (s)-[r%s]->(t)
                               WHERE ALL(k in keys(filters) WHERE filters[k] = r[k])
                               %s
                               return s,r,t
-                              ''' % (relstring,' AND '.join(wheres)),
+                              ''' % (relstring, ' AND '.join(wheres)),
                            **params
                            )
         return Neo4jWrapper(result, self)
 
-#        return [self._neo2edge(r['r']) for r in result]
+    #        return [self._neo2edge(r['r']) for r in result]
 
     def del_edge(self, edgeid):
         result = self._run('''match (s)-[r]->(t) where r._id=$_id delete r''', _id=edgeid)
@@ -203,7 +200,7 @@ class NeoGraphDB:
         self.tx = None
 
     def query(self, statement, **params):
-        result = self._run(statement,**params)
+        result = self._run(statement, **params)
         return Neo4jWrapper(result, self)
 
     def traverse(self, labels=None, nodes=None, **filters):
@@ -219,16 +216,16 @@ class NeoGraphDB:
 
         return SimpleTraverser(self, nodes)
 
-    def _recursive_replace(self,object):
+    def _recursive_replace(self, object):
         objecttype = type(object)
         if objecttype is neo4j.Node:
             return self._neo2node(object)
-        elif objecttype in [list,tuple,neo4j.Path]:
+        elif objecttype in [list, tuple, neo4j.Path]:
             return [self._recursive_replace(o) for o in object]
-        elif objecttype is neo4j.Relationship or hasattr(object,'start_node'): # neo4j, I love you:
+        elif objecttype is neo4j.Relationship or hasattr(object, 'start_node'):  # neo4j, I love you:
             return self._neo2edge(object)
         elif hasattr(object, 'keys'):
-            return {k:self._recursive_replace(object[k]) for k in object.keys()}
+            return {k: self._recursive_replace(object[k]) for k in object.keys()}
         else:
             return object
 
@@ -239,9 +236,8 @@ class NeoGraphDB:
     def schemahandler(self):
         return Schemahandler(self)
 
-    def _update_propdict(self): # 00_maybe better db.propdict? How do we proper cache this?
+    def _update_propdict(self):  # 00_maybe better db.propdict? How do we proper cache this?
         self.propdict = {p['_propname']: p for p in self.schemahandler.propertynodes}
-
 
 
 class Neo4jWrapper(ResultWrapper):
@@ -252,8 +248,6 @@ class Neo4jWrapper(ResultWrapper):
         graph = self.result.graph()
         self.nodes = [self.db._recursive_replace(n) for n in graph.nodes]
         self.edges = [self.db._recursive_replace(e) for e in graph.relationships]
-
-
 
 
 if __name__ == "__main__":

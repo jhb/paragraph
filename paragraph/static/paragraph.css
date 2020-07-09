@@ -79,3 +79,12 @@ html, body {
     padding: 0.5em;
     scrollbar-color: #f9f9f9 white;
 }
+
+.uk-table td {
+    padding: 5px 5px;
+
+}
+
+.icon {
+    min-width: 1em;
+}

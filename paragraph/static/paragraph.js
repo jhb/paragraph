@@ -24,6 +24,7 @@ var add_node = function () {
     })
 }
 var start_3d = function () {
+    console.log('start 3d');
     var div = document.getElementById('samplediv');
     div.style.height = '1em';
     var em = div.offsetHeight;
