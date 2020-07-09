@@ -1,0 +1,13 @@
+PyYAML
+networkx
+setuptools
+pytest
+paragraph
+ipython
+Markdown
+neo4j
+WTForms
+Flask
+python-dotenv
+blinker
+Chameleon

@@ -1,8 +1,10 @@
 """Database driver for neo4j"""
+from typing import Any
 from uuid import uuid4
 
-from neo4j import GraphDatabase, BoltStatementResult
+from neo4j import GraphDatabase,Result
 import neo4j
+import neo4j.graph
 
 from paragraph.basic import GraphDB, Node, Edge, ResultWrapper
 from paragraph.schemahandler import Schemahandler
@@ -17,43 +19,42 @@ import logging
 # noinspection PyCallingNonCallable
 class NeoGraphDB:
 
-    def __init__(self, uri='bolt://localhost:7687', username='', password='', encrypted=False, debug=0):
-        """
-        Initialize the database connection
+    def __init__(self,
+                 uri: str = 'bolt://localhost:7687',
+                 username: str = '',
+                 password: str = '',
+                 encrypted: bool = False,
+                 debug: int = 0) -> None:
 
-        :param uri:
-        :param username:
-        :param password:
-        :param encrypted:
-        """
         self.driver = GraphDatabase.driver(uri, auth=(username, password), encrypted=encrypted)
         self.session = self.driver.session()
         self.tx = None
         self.debug = debug
+
+        # some form of caching
         self._nodecache = {}
         self._edgecache = {}
         self.propdict = {}
+
+        # populate the propdict
         self._update_propdict()
 
     def __call__(self, *args, **kwargs):
         return self.query_nodes(*args, **kwargs)
 
-    def begin(self):
-        """Begin a transaction
+    def begin(self) -> neo4j.Transaction:
+        """Begin a transaction"""
 
-        :return transaction
-        """
         if not self.tx:
             self.tx = self.session.begin_transaction()
         return self.tx
 
-    def _run(self, statement, **kwargs):
+    def _run(self, statement: str, **kwargs: Any) -> neo4j.Result:
         tx = self.begin()
         logging.debug(f'{statement} --- {kwargs}')
         if self.debug == 2:
             self.debug = 0
         result = tx.run(statement, **kwargs)
-        result.detach()
         return result
 
     def _neo2node(self, neonode):
@@ -218,11 +219,11 @@ class NeoGraphDB:
 
     def _recursive_replace(self, object):
         objecttype = type(object)
-        if objecttype is neo4j.Node:
+        if objecttype is neo4j.graph.Node:
             return self._neo2node(object)
-        elif objecttype in [list, tuple, neo4j.Path]:
+        elif objecttype in [list, tuple, neo4j.graph.Path]:
             return [self._recursive_replace(o) for o in object]
-        elif objecttype is neo4j.Relationship or hasattr(object, 'start_node'):  # neo4j, I love you:
+        elif objecttype is neo4j.graph.Relationship or hasattr(object, 'start_node'):  # neo4j, I love you:
             return self._neo2edge(object)
         elif hasattr(object, 'keys'):
             return {k: self._recursive_replace(object[k]) for k in object.keys()}
@@ -236,7 +237,8 @@ class NeoGraphDB:
     def schemahandler(self):
         return Schemahandler(self)
 
-    def _update_propdict(self):  # 00_maybe better db.propdict? How do we proper cache this?
+    def _update_propdict(self):  # 00_caching maybe better db.propdict? How do we proper cache this?
+        """Updates the dict of available propertynodes"""
         self.propdict = {p['_propname']: p for p in self.schemahandler.propertynodes}
 
 
