@@ -8,4 +8,12 @@ setup(name='paragraph',
       author_email='devs@graphui.org',
       license='GPLV3',
       packages=['paragraph'],
+      install_requires=[
+        'Flask',
+        'neo4j',
+        'pytest',
+        'flask_wtf',
+        'wtforms',
+        'python-dotenv'
+    ],
       zip_safe=False)
